@@ -1,0 +1,7 @@
+
+# dependencies
+/multisig-wallet/node_modules
+/multisig-wallet-fe/node_modules
+/multisig-wallet-fe/.next
+/multisig-wallet/.env
+/multisig-wallet-fe/.env

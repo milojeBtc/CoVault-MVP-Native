@@ -1,0 +1,90 @@
+{
+    "alice": [
+        {
+            "pubKey": "031dd54df49725c82a6fbbc6e255473150ea4034433715d805e160d85cb764d2c3",
+            "address": "mvmC84NZRByHAnWz1Hy6AiKVQjmLoV7KaJ",
+            "privateKey": "cNek3hxY6ubCTwPzHHJEydvCBppFy8PaqC2pvGa9hvktMyaHfyKp"
+        },
+        {
+            "pubKey": "02ac4918f21adfb7a3da2d2f5d920a966ebd23300d1c3f78cf2c95d86807eac9a1",
+            "address": "n1fsKpGPUiK7iJFCZun8x2ZgjRFwkmXoBa",
+            "privateKey": "cTXsGTEPX7pDLfrKE9RTb6jo5vYrE38G3Gqs5qQTUyCVqNcKf1KB"
+        },
+        {
+            "pubKey": "02c45edb941b970d881d49db22acf73db758ceef8704b41131eeb286a189a32166",
+            "address": "mgj4coBiovRCKbGJMyGqRL27JWPyNsF8sh",
+            "privateKey": "cNgjn3ezuQ6nL4ikshDEv16gJGurxVHu7kHVoKHciTvuhENCG5hg"
+        },
+        {
+            "pubKey": "02c7b5ded0aaa3311da61ef17d7fcff52b6ed339d42724a1d00384399eb0ce350c",
+            "address": "n3RuL8KoqpehdtYLvJNetFEcjtvTSe6b19",
+            "privateKey": "cRpuucLg51AAAtSSiVUbHoVsCUGdCp4kpu61BUSbVtJDCxcxbDve"
+        }
+    ],
+    "bob": [
+        {
+            "pubKey": "0285de7eb44d4b9c4de0fa10ba6e113678b4bc72d3cb9da477fa77b6ec3085b96f",
+            "address": "mkDvvpMHNgBHk8czGn3zujQEaDJb4pcREZ",
+            "privateKey": "cRDzv5ArwC9YyUskLXBAzMcnjyApcGMq8KMBU9tuUcmaZoVvTG8L"
+        },
+        {
+            "pubKey": "026e0a209881b7b4f3c1b48b8e7d963a59dec03a1c4d34d9cb2e327249948743d1",
+            "address": "mvWhYbBytzhkTeGU94S7WfQATgXjBhtrnm",
+            "privateKey": "cQB8owXq181kbCKZRoSDDbTdECZuvr9V12oDbasvXi7u3TY1ZozG"
+        },
+        {
+            "pubKey": "02ee76480538b624c9bd5ab3532cd55de4f655e99d0c7591139d78ee54fb575441",
+            "address": "mtLTpthuLe2W5ihSNyd67WwmtGNx1wLFvZ",
+            "privateKey": "cUzsyEFyXzD2BXvpddzgFG5A5qYZPpWKC2fmpFKCDYpRZaYoyrLw"
+        },
+        {
+            "pubKey": "0282ce9f59f608573a35ee03124c25a631b7d6d0239800ef1d1428f975d5d8027d",
+            "address": "mfobZrF31c5zi3vfUsCJE9tDHFqtfNEQmf",
+            "privateKey": "cQtKRsAtu9Mbvvb2pyfKFyZAziyayPekp3YHbnHnxbbEzfs2JGZT"
+        }
+    ],
+    "carol": [
+        {
+            "pubKey": "02af76807a10bdb60a3923fa753b66bb66c3a9b511a17988c68cb93514b8a2a78e",
+            "address": "mwyM35Fm8eeEHesqC5w2VeyXzqnQtCViid",
+            "privateKey": "cMeYUY2cWNbzXTwiamJizShKexkfHa3RAJJq37EZTMy8RHAMvx64"
+        },
+        {
+            "pubKey": "03670d4b5cf6087d00aa79a8023b9f5dff13983b6c78e724d82060330b77576a42",
+            "address": "mkbPDMEaDgWPKzrwHejvimVf44qef4XYr6",
+            "privateKey": "cNdTQbfogbTU5CENnd89EZSQ37wztzwbvkQ9jDs1CkuGGeDhTk2R"
+        },
+        {
+            "pubKey": "038ee74efdd3dff8f00b429dc80ac2b9495a048159f191e2058a1d1fb03e8d26e5",
+            "address": "myFa86j6Y3qxWNd8ZfEj9p5bwshHZsT3zv",
+            "privateKey": "cNgUMkiwtSAi8VnSR6RHGZbUe3KAzw8AsBEEfpK4xve7JeHx3C8L"
+        },
+        {
+            "pubKey": "0370439bccfb5ff1632ab34235d8172a6930ccd379601a81e2241bda64e88ec9e7",
+            "address": "mtQYdgozxcyS3hPnScBERnLcc5FbTf5G9G",
+            "privateKey": "cVXamh6bqsvWzpRssqva91k2ZfhPx6SciE1SKKCyUqnptkFwKuuU"
+        }
+    ],
+    "dave": [
+        {
+            "pubKey": "03c65039a13fa54d89daa58a4155c66b8b26ff583ed71221b6b53c451e3e99f255",
+            "address": "mgMXTAmNiaextmjA2zGgwrQYaRHGrqsW3h",
+            "privateKey": "cRp4Ufkic54XAp1mjqj3iLnCLHjAPC2B6chjYWMeEwHMLtM2rmgP"
+        },
+        {
+            "pubKey": "027b4f47321a838ae93d03892bfd33071b4c65384cd1573d47c55b1e31c75e70d8",
+            "address": "n213oYogKjF68XZ5vsyFm2XH2Tdv713TNx",
+            "privateKey": "cUGh5uGfDkh8PurDhgfoiQn45vUDMFodFN4q1vvUCREet6GWxoN1"
+        },
+        {
+            "pubKey": "02d96f9b1c7a3c9d4315346be0cd00aa91f088702b30c1cbb4d17436a97ca5a602",
+            "address": "mqjPviDYxXiqFmrsCBicV8jBPi2FAJvyBK",
+            "privateKey": "cVyE9zGpPgePcPRumSQ2TLXsACkPbiRNRYB8B8xBKznNhZurE5oD"
+        },
+        {
+            "pubKey": "02aa3df4d017e53b86211972967c8514bb86917e128a0842f5d4afbd75e7869c43",
+            "address": "mo5oMB4Me8W3JYJ4KiZpa4mQyMnDidZpFt",
+            "privateKey": "cVAuYUNvuzPr2KvP7tuTgxub2rGTPGBcY4MmTVG5y6DXRtrAJinw"
+        }
+    ]
+}

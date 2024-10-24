@@ -1,0 +1,3548 @@
+openapi: 3.0.3
+info:
+  title: Welcome to Co-vault Protocol
+  description: This is swagger UI for Co-vault protocol.
+  version: 1.0.1
+servers:
+  - url: https://server.covault.xyz/api
+tags:
+  - name: multisig
+    description: Everything for creating, fetching, updating of multisig wallets.
+    externalDocs:
+      description: Find out more
+      url: http://swagger.io
+paths:
+  /multisig/create-vault:
+    post:
+      tags:
+        - multisig
+      summary: Create Multig vault.
+      description: Create new vault by PublicList, Threshold value, Assets
+      operationId: create_vault
+      requestBody:
+        description: >-
+          PublicKey of co-signers, minSignCount for Threshold, assets for DAO
+          token
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateVault"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/CreateVault"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/CreateVault"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateVaultResponse"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/CreateVaultResponse"
+        "400":
+          description: Invalid pubkeyList, minSignCount, assets
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateVaultResponse400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/CreateVaultResponse400"
+        "404":
+          description: Vault not found
+        "422":
+          description: Validation exception
+  /multisig/fetchVaultList:
+    get:
+      tags:
+        - multisig
+      summary: Fetch all multisig wallet list.
+      description: Fetch all multisig wallet list.
+      operationId: multisig_fetchWalletList
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/fetchVaultList"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/fetchVaultList"
+        "400":
+          description: There is no wallet in DB.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/fetchVaultList400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/fetchVaultList400"
+        "404":
+          description: API not found
+        "422":
+          description: Validation exception
+  /multisig/update-vault:
+    post:
+      tags:
+        - multisig
+      summary: Update Multig vault.
+      description: Update an existing pet by PublicList, Threshold value, Assets
+      operationId: update_vault
+      requestBody:
+        description: vaultId of existed valut,  PublicKey of co-signers, minSignCount for Threshold, assets for DAO token, ordinalAddress of updater
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateVault"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/updateVault"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/updateVault"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updateVaultResponse200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/updateVaultResponse200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updateVaultResponse400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/updateVaultResponse400"
+        "422":
+          description: Validation exception
+  /multisig/sendBtc: 
+    post:
+      tags:
+        - multisig
+      summary: Generate PSBT to send BTC.
+      description: Generate PSBT to send BTC and create request to get signature from another co-signer
+      operationId: multisig_sendBtc
+      requestBody:
+        description: walletId of existed valut, destination of co-signers, amount for transfer, paymentAddress of updater, pubKey of updater and vaultType
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/sendBtc"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/sendBtc"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/sendBtc"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendBtcResponse200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendBtcResponse200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendBtcResponse400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendBtcResponse400"
+        "422":
+          description: Validation exception
+  /multisig/sendRune: 
+    post:
+      tags:
+        - multisig
+      summary: Generate PSBT to send Rune on Native Segwit or Taproot.
+      description: Generate PSBT to send Rune and create request to get signature from another co-signer
+      operationId: multisig_sendRune
+      requestBody:
+        description: walletId of existed valut, destination of co-signers, amount for transfer, paymentAddress of updater, pubKey of updater and vaultType
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/sendRune"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/sendRune"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/sendRune"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendRuneResponse200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendRuneResponse200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendRuneResponse400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendRuneResponse400"
+        "422":
+          description: Validation exception
+  /multisig/checking-brc20-request: 
+    post:
+      tags:
+        - multisig
+      summary: Check If there is already brc20 request by one specific address.
+      description: Check If there is already brc20 request by one specific address.
+      operationId: checking_brc20_request
+      requestBody:
+        description: Multisig Id, Wallet Address, Ticker, Transfer Amount, Payment Address, Payment PublicKey
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/checkingBrc20"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/checkingBrc20"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/checkingBrc20"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/checkingBrc20Response200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/checkingBrc20Response200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/checkingBrc20Response400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/checkingBrc20Response400"
+        "422":
+          description: Validation exception
+  /multisig/send-brc20-ns: 
+    post:
+      tags:
+        - multisig
+      summary: Transfer Brc-20 on Native Segwit address
+      description: Transfer Brc-20 on Native Segwit address
+      operationId: send_brc20_ns
+      requestBody:
+        description: VaultId, InscriptionId, Destination, Ticker, Amount, PaymentAddress and VaultType
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/sendBrc20NS"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/sendBrc20NS"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/sendBrc20NS"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendBrc20NSResponse200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendBrc20NSResponse200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendBrc20NSResponse400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendBrc20NSResponse400"
+        "422":
+          description: Validation exception
+  /multisig/send-brc20-taproot: 
+    post:
+      tags:
+        - multisig
+      summary: Transfer Brc-20 on Taproot address
+      description: Transfer Brc-20 on Taproot address
+      operationId: send_brc20_taproot
+      requestBody:
+        description: VaultId, InscriptionId, Destination, Ticker, Amount, PaymentAddress and VaultType
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/sendBrc20NS"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/sendBrc20NS"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/sendBrc20NS"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendBrc20NSResponse200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendBrc20NSResponse200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendBrc20NSResponse400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendBrc20NSResponse400"
+        "422":
+          description: Validation exception
+  /multisig/getBtcAndRuneByAddress: 
+    post:
+      tags:
+        - multisig
+      summary: Get Btc and Rune balance by Address
+      description: Get Btc and Rune balance by Address
+      operationId: getBtcAndRuneByAddress
+      requestBody:
+        description: Address
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getBtcAndRuneByAddress"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/getBtcAndRuneByAddress"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/getBtcAndRuneByAddress"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getBtcAndRuneByAddressResponse200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/getBtcAndRuneByAddressResponse200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getBtcAndRuneByAddressResponse400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/getBtcAndRuneByAddressResponse400"
+        "422":
+          description: Validation exception
+  /multisig/send-ordinals-ns: 
+    post:
+      tags:
+        - multisig
+      summary: Transfer Ordinals on Native Segwit address
+      description: Transfer Ordinals on Native Segwit address
+      operationId: send_ordinals_ns
+      requestBody:
+        description: VaultId, InscriptionId, Destination, PaymentAddress
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/sendordinalsNS"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/sendordinalsNS"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/sendordinalsNS"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendordinalsNSResponse200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendordinalsNSResponse200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendordinalsNSResponse400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendordinalsNSResponse400"
+        "422":
+          description: Validation exception
+  /multisig/send-ordinals-taproot: 
+    post:
+      tags:
+        - multisig
+      summary: Transfer ordinals on Taproot address
+      description: Transfer ordinals on Taproot address
+      operationId: send_ordinals_taproot
+      requestBody:
+        description: walletId, InscriptionId, Destination, Amount, PaymentAddress
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/sendordinalsNS"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/sendordinalsNS"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/sendordinalsNS"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendordinalsNSResponse200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendordinalsNSResponse200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendordinalsNSResponse400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendordinalsNSResponse400"
+        "422":
+          description: Validation exception
+  /multisig/send-tap-ordinals-ns: 
+    post:
+      tags:
+        - multisig
+      summary: Transfer Ordinals on Native Segwit address
+      description: Transfer Ordinals on Native Segwit address
+      operationId: send_tap_ordinals_ns
+      requestBody:
+        description: VaultId, InscriptionId, Destination, PaymentAddress
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/sendordinalsNS"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/sendordinalsNS"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/sendordinalsNS"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendordinalsNSResponse200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendordinalsNSResponse200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendordinalsNSResponse400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendordinalsNSResponse400"
+        "422":
+          description: Validation exception
+  /multisig/send-tap-ordinals-taproot: 
+    post:
+      tags:
+        - multisig
+      summary: Transfer ordinals on Taproot address
+      description: Transfer ordinals on Taproot address
+      operationId: send_tap_ordinals_taproot
+      requestBody:
+        description: walletId, InscriptionId, ordinalAddress, PaymentAddress
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/sendTapOrdinalsNS"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/sendTapOrdinalsNS"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/sendTapOrdinalsNS"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendTapOrdinalsNSResponse200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendTapOrdinalsNSResponse200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/sendTapOrdinalsNSResponse400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/sendTapOrdinalsNSResponse400"
+        "422":
+          description: Validation exception
+  /multisig/pre-tap-inscribe: 
+    post:
+      tags:
+        - multisig
+      summary: Get PSBT for tap inscribing
+      description: Get PSBT for tap inscribing
+      operationId: pre_tap_inscribe
+      requestBody:
+        description: PaymentAddress, PaymentPublicKey, itemList
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/preTapInscribe"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/preTapInscribe"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/preTapInscribe"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/preTapInscribeResponse200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/preTapInscribeResponse200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/preTapInscribeResponse400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/preTapInscribeResponse400"
+        "422":
+          description: Validation exception
+  /multisig/tap-inscribe: 
+    post:
+      tags:
+        - multisig
+      summary: Inscribing Tap assets
+      description: Inscribing Tap assets
+      operationId: tap_inscribe
+      requestBody:
+        description: receiveAddress, privateKey, amount, hexedPsbt, signedHexedPsbt, itemList
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/tapInscribe"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/tapInscribe"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/tapInscribe"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tapInscribeResponse200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/tapInscribeResponse200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tapInscribeResponse400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/tapInscribeResponse400"
+        "422":
+          description: Validation exception
+  /multisig/get-tap-assets: 
+    post:
+      tags:
+        - multisig
+      summary: Get Tap balance List
+      description: Get Tap balance List
+      operationId: get_tap_assets
+      requestBody:
+        description: address
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getTapAssets"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/getTapAssets"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/getTapAssets"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getTapAssetsResponse200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/getTapAssetsResponse200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getTapAssetsResponse400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/getTapAssetsResponse400"
+        "422":
+          description: Validation exception
+  
+  /request/getAllRequestList:
+    get:
+      tags:
+        - request
+      summary: Returns all request List
+      description: Returns all request List
+      operationId: getAllRequestList
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getAllRequestList200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/getAllRequestList200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPsbtFromRequest400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/getPsbtFromRequest400"
+        "422":
+          description: Validation exception
+  /request/getPsbtFromRequest:
+    post:
+      tags:
+        - request
+      summary: Returns specific request by id and pubkey
+      description: Returns all request List
+      operationId: getPsbtFromRequest
+      requestBody:
+        description: Get request by vault id and pubkey.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/getPsbtFromRequest"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/getPsbtFromRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/getPsbtFromRequest"
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPsbtFromRequest200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/getPsbtFromRequest200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPsbtFromRequest400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/getPsbtFromRequest400"
+        "422":
+          description: Validation exception
+  /request/updateRequest:
+    post:
+      tags:
+        - request
+      summary: Sign request and broadcasting when threshold get reached
+      description: Update reqeust
+      operationId: updateRequest
+      requestBody:
+        description: vaultId of existed valut,  PublicKey of co-signers, minSignCount for Threshold, assets for DAO token, ordinalAddress of updater
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateRequest"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/updateRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/updateRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updateRequest200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/updateRequest200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/updateRequest400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/updateRequest400"
+        "422":
+          description: Validation exception
+  /request/cancelUpdateForRequest:
+    post:
+      tags:
+        - request
+      summary: Cancel the request to update the psbt
+      description: Cancel reqeust
+      operationId: cancelUpdateForRequest
+      requestBody:
+        description: Cancle the request to update the psbt signing to let other can request to sign that psbt.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/cancelUpdateForRequest"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/cancelUpdateForRequest"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/cancelUpdateForRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/cancelUpdateForRequest200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/cancelUpdateForRequest200"
+        "400":
+          description: There is no exist wallet with this id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/cancelUpdateForRequest400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/cancelUpdateForRequest400"
+        "422":
+          description: Validation exception
+
+  /rune/tx-check:
+    post:
+      tags:
+        - rune
+      summary: Checking transaction if that is confirmed.
+      description: Checking transaction of rune ethcing if that is confirmed or not
+      operationId: tx_check
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tx_check200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/tx_check200"
+        "400":
+          description: Invalid sellerInfo, runeTicker and sellPrice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/tx_check400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/tx_check400"
+        "404":
+          description: Vault not found
+        "422":
+          description: Validation exception
+  /rune/etch-token:
+    post:
+      tags:
+        - rune
+      summary: etching new rune tokens
+      description: Etching new rune tokens according to runeName and runeAmount, rune symbol, initialPrice and creator Address
+      operationId: etch_token
+      requestBody:
+        description: buyer Info, inputs Array, listId and psbt
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/etch_runeToken"
+          application/xml:
+            schema:
+              $ref: "#/components/schemas/etch_runeToken"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/etch_runeToken"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/etch_runeToken200"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/etch_runeToken200"
+        "400":
+          description: Invalid sellerInfo, runeTicker and sellPrice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/etch_runeToken400"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/etch_runeToken400"
+        "404":
+          description: Vault not found
+        "422":
+          description: Validation exception
+         
+components:
+  schemas:
+    Address:
+      type: object
+      properties:
+        ordinalAddress:
+          type: string
+          example: tb1p2vdp0uvc68ng6j56mq4gdkd6jfwhj3qhq2zhp44zxnsgp903d9sqjqlq4r
+        ordinalPublicKey:
+          type: string
+          example: 0307b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa69
+        paymentAddress:
+          type: string
+          example: tb1p2vdp0uvc68ng6j56mq4gdkd6jfwhj3qhq2zhp44zxnsgp903d9sqjqlq4r
+        paymentPublicKey:
+          type: string
+          example: 0307b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa69
+    Creator:
+      type: object
+      properties:
+        paymentAddress:
+          type: string
+          example: tb1p2vdp0uvc68ng6j56mq4gdkd6jfwhj3qhq2zhp44zxnsgp903d9sqjqlq4r
+        paymentPublicKey:
+          type: string
+          example: tb1p2vdp0uvc68ng6j56mq4gdkd6jfwhj3qhq2zhp44zxnsgp903d9sqjqlq4r
+        ordinalAddress:
+          type: string
+          example: tb1p2vdp0uvc68ng6j56mq4gdkd6jfwhj3qhq2zhp44zxnsgp903d9sqjqlq4r
+        ordinalPublicKey:
+          type: string
+          example: tb1p2vdp0uvc68ng6j56mq4gdkd6jfwhj3qhq2zhp44zxnsgp903d9sqjqlq4r
+    CreateVault:
+      required:
+        - pubKeyList
+        - minSignCount
+        - assets
+        - imageUrl
+        - vaultType
+      type: object
+      properties:
+        pubKeyList:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            type: string
+          example:
+            - 03abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a
+            - 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+            - 021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae8
+        minSignCount:
+          type: string
+          example: 2
+        assets:
+          $ref: "#/components/schemas/Assets"
+        imageUrl:
+          type: string
+          example: Avatar.png
+        vaultType:
+          type: string
+          example: Taproot
+    CreateVaultResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Create Musig Wallet successfully. Rune etching successfully
+        payload:
+          type: object
+          properties:
+            vault:
+              $ref: "#/components/schemas/VaultRespoonse"
+            rune:
+              $ref: "#/components/schemas/RuneRespoonse"
+      xml:
+        name: order
+    CreateVaultResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: >-
+            There is no publicKey value. || There is no minSignCount value. ||
+            minSignCount should be less than pubkey list count
+        payload:
+          type: object
+          example: null
+      xml:
+        name: order
+    Assets:
+      required:
+        - creatorAddress
+        - initialPrice
+        - runeAmount
+        - runeName
+        - runeSymbol
+      type: object
+      properties:
+        creatorAddress:
+          type: string
+          example: tb1p2vdp0uvc68ng6j56mq4gdkd6jfwhj3qhq2zhp44zxnsgp903d9sqjqlq4r
+        initialPrice:
+          type: string
+          example: 3000
+        runeAmount:
+          type: string
+          example: 40000
+        runeName:
+          type: string
+          example: EIGHTEEN.RUNE.TOKEN.TOKEN
+        runeSymbol:
+          type: string
+          example: ✨
+    VaultRespoonse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Create Musig Wallet successfully.
+        payload:
+          type: object
+          properties:
+            DBID:
+              type: string
+              example: 6686bfc46683b6c56b119f49
+            address:
+              type: string
+              example: tb1qc985rzyegrrqzp2s3f7vae6hnkr2n9gqzr4n4r3r2xmahhn0zp0q804pcg
+      xml:
+        name: order
+    RuneRespoonse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Rune etching successfully.
+        payload:
+          type: object
+          properties:
+            txId:
+              type: string
+              example: ""
+            sendBTCTxId:
+              type: string
+              example: 07df00eda60248a776d93eba39749828f5611f25d5b46a78bcf5136a71d7d2b7
+            runeName:
+              type: string
+              example: EIGHTEEN.RUNE.TOKEN
+            runeSymbol:
+              type: string
+              example: ✨
+            initialPrice:
+              type: string
+              example: 3000
+            creatorAddress:
+              type: string
+              example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+            runeid:
+              type: string
+              example: ""
+            runeAmount:
+              type: string
+              example: 40000
+            remainAmount:
+              type: string
+              example: 40000
+            psbt:
+              type: string
+              example: 70736274ff01008902000000016944205a0a0a00fce4536bf67e5d495bd403e6caf9b7f8b03a79a51921d3b4a10000000000ffffffff020000000000000000226a5d1f02070488e8ebc3afdfaedd83fbda5b0394d00205bdb00306b0ea010a0008002202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d404000000000001012bc64800000000000022512051d9fd1114fe965195cf900ba1bedf94167ded8a6bf409ce9d674d51094e27e82215c171c36572a674337e59500612bfcfc216458e9e45f25b66f1d9b01f351964699afdb9012071c36572a674337e59500612bfcfc216458e9e45f25b66f1d9b01f351964699aac0063036f7264010117746578742f68746d6c3b636861727365743d7574662d38010d0b08f47af8fababa83bd760b004d63013c21444f43545950452068746d6c3e0a202020203c68746d6c206c616e673d22656e223e0a2020202020203c686561643e0a20202020202020203c6d65746120636861727365743d225554462d3822202f3e0a20202020202020203c6d657461206e616d653d2276696577706f72742220636f6e74656e743d2277696474683d6465766963652d77696474682c20696e697469616c2d7363616c653d312e3022202f3e0a20202020202020203c7469746c653e4275696c6420596f7572204f776e20526563757273697665204f7264696e616c3c2f7469746c653e0a2020202020203c2f686561643e0a2020202020203c626f6479207374796c653d226d617267696e3a20307078223e0a20202020202020203c6469763e0a202020202020202020204c45542e55532e4655434b494e472e474f2e474f2e474f0a20202020202020203c2f6469763e0a2020202020203c2f626f64793e0a202020203c2f68746d6c3e68c0000000
+            status:
+              type: string
+              example: Pending
+      xml:
+        name: order
+    fetchVaultList:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Fetch wallet list successfully
+        payload:
+          type: object
+          properties:
+            native:
+              type: array
+              items:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                    example: 6681c76e679fdb30af1b5a94
+                  address:
+                    type: string
+                    example: tb1q3xdmptl2ta5rfetcc922t7e7xppdqfxnzqg75g9dexprse95nrhqrwp3zf
+                  assets:
+                    $ref: "#/components/schemas/Assets"
+                  cosigner:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - >-
+                        03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+                      - >-
+                        0307b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa69
+                      - >-
+                        02a356f1fb4417c38d9c8a16c4878da5e91196a5b3199fd79a2160d4b1b3ccff4f
+                  createAt:
+                    type: string
+                    example: "2024-06-30T20:56:05.458Z"
+                  p2msOutput:
+                    type: string
+                    example: >-
+                      0020899bb0afea5f6834e578c154a5fb3e3042d024d31011ea20adc9823864b498ee
+                  threshold:
+                    type: number
+                    example: 2
+                  witnessScript:
+                    type: string
+                    example: 522103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86210307b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa692102a356f1fb4417c38d9c8a16c4878da5e91196a5b3199fd79a2160d4b1b3ccff4f53ae
+            taproot:
+              type: array
+              items:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                    example: 6681c76e679fdb30af1b5a94
+                  address:
+                    type: string
+                    example: tb1q3xdmptl2ta5rfetcc922t7e7xppdqfxnzqg75g9dexprse95nrhqrwp3zf
+                  assets:
+                    $ref: "#/components/schemas/Assets"
+                  cosigner:
+                    type: array
+                    items:
+                      type: string
+                    example:
+                      - >-
+                        03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+                      - >-
+                        0307b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa69
+                      - >-
+                        02a356f1fb4417c38d9c8a16c4878da5e91196a5b3199fd79a2160d4b1b3ccff4f
+                  createAt:
+                    type: string
+                    example: "2024-06-30T20:56:05.458Z"
+                  privateKey:
+                    type: string
+                    example: >-
+                      01028e1f47d3b46bf922956d6cf2d84b071a8903ba36fdedff551f9ea19a63c6
+                  tapscript:
+                    type: string
+                    example: 192
+                  threshold:
+                    type: number
+                    example: 2
+                  imageUrl:
+                    type: string
+                    example: bRmT0iO1zIiZNuF1OUrSGw6NcNTqseWL.png
+                  __v:
+                    type: number
+                    example: 0
+      xml:
+        name: order
+    updateVault:
+      required:
+        - vaultId
+        - pubKeyList
+        - minSignCount
+        - assets
+        - ordinalAddress
+        - imageUrl
+        - vaultType
+      type: object
+      properties:
+        vaultId:
+          type: string
+          example: 6686bf8b6683b6c56b119f43
+        pubKeyList:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            type: string
+          example:
+            - 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+            - 021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae8
+        minSignCount:
+          type: string
+          example: 2
+        assets:
+          $ref: "#/components/schemas/Assets"
+        ordinalAddress:
+          type: string
+          example: tb1p644m7l0fa4wv8x84w6wwhgh5alzpmnkvzxp95n776y6ek8348rwsamh86h
+        imageUrl:
+          type: string
+          example: image.png
+        vaultType:
+          type: string
+          example: Taproot
+    updateVaultResponse200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Request saved sucessfully
+        payload:
+          type: object
+          properties:
+            psbtHex:
+              type: string
+              example: >-
+                70736274ff0100fd310102000000038bf0969b932db9aae1b5532bcc64f8aeb55bab6a420014f66d94aece98cca5c20100000000ffffffff33e589a4f50c49becb7323dc6118c85bcc822f7ba70c0c11997c5b5e9203ce980200000000ffffffffec89f90656e564eff39f00b3276cd75afb3ad5fa2462ec8b8fd464e628ae61630000000000ffffffff049001000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a204e000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a401f000000000000225120dd0db7020be2937c2554d68dc1be856d2483be077f00504b5790aba49fe29e5eca4c010000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a000000000001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012ba086010000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0000000000
+            psbtBase64:
+              type: string
+              example: >-
+                cHNidP8BAP0xAQIAAAADi/CWm5MtuarhtVMrzGT4rrVbq2pCABT2bZSuzpjMpcIBAAAAAP////8z5Ymk9QxJvstzI9xhGMhbzIIve6cMDBGZfFtekgPOmAIAAAAA/////+yJ+QZW5WTv858Asyds11r7OtX6JGLsi4/UZOYormFjAAAAAAD/////BJABAAAAAAAAIgAgqaBdelHWhJEAV+iYGVKU2qVYkZhg7iu5CNWRMdr66wogTgAAAAAAACIAIKmgXXpR1oSRAFfomBlSlNqlWJGYYO4ruQjVkTHa+usKQB8AAAAAAAAiUSDdDbcCC+KTfCVU1o3BvoVtJIO+B38AUEtXkKukn+KeXspMAQAAAAAAIgAgqaBdelHWhJEAV+iYGVKU2qVYkZhg7iu5CNWRMdr66woAAAAAAAEBKyICAAAAAAAAIgAgrjfdMkhTjo2AJ1XyxACP2GE7YkDviQ5zz9aCs1OfKqABBWlSIQOrsbRPZSYTDluLWAtfh/apZo1mUu4zaygstyW+ZFqraiEDSB3UbtS/qAPWQIqClKZ4JRooafjSTwoJNYmUBLfzWoYhAh/SbtzjMkVIVlchcoxy2Qh0ceEn0/Tgk+eLBPTa2aroU64AAQErIgIAAAAAAAAiACCuN90ySFOOjYAnVfLEAI/YYTtiQO+JDnPP1oKzU58qoAEFaVIhA6uxtE9lJhMOW4tYC1+H9qlmjWZS7jNrKCy3Jb5kWqtqIQNIHdRu1L+oA9ZAioKUpnglGihp+NJPCgk1iZQEt/NahiECH9Ju3OMyRUhWVyFyjHLZCHRx4SfT9OCT54sE9NrZquhTrgABASughgEAAAAAACIAIK433TJIU46NgCdV8sQAj9hhO2JA74kOc8/WgrNTnyqgAQVpUiEDq7G0T2UmEw5bi1gLX4f2qWaNZlLuM2soLLclvmRaq2ohA0gd1G7Uv6gD1kCKgpSmeCUaKGn40k8KCTWJlAS381qGIQIf0m7c4zJFSFZXIXKMctkIdHHhJ9P04JPniwT02tmq6FOuAAAAAAA=
+    updateVaultResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: There is no exist wallet with this id
+        payload:
+          type: object
+          example: null
+    fetchVaultList400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: There is no wallet here.
+        payload:
+          type: object
+          example: null
+    getAllRequestList200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Fetch all request successfully.
+        payload:
+          type: array
+          items:
+            type: object
+            properties:
+              assets:
+                $ref: "#/components/schemas/Assets"
+              _id:
+                type: string
+                example: 668787fa55b8778f50981d34
+              musigId:
+                type: string
+                example: 6686bf8b6683b6c56b119f43
+              type:
+                type: string
+                example: VaultUpgrade
+              transferAmount:
+                type: string
+                example: ALL
+              destinationAddress:
+                type: string
+                example: tb1q4xs967j366zfzqzhazvpj555m2j43yvcvrhzhwgg6kgnrkh6av9qf73axx
+              creator:
+                type: string
+                example: tb1p644m7l0fa4wv8x84w6wwhgh5alzpmnkvzxp95n776y6ek8348rwsamh86h
+              cosigner:
+                type: array
+                items:
+                  type: string
+                example:
+                  [
+                    03abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a,
+                    03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86,
+                  ]
+              signedCosigner:
+                type: array
+                items:
+                  type: string
+                example: []
+              psbt:
+                type: array
+                items:
+                  type: string
+                example:
+                  [
+                    70736274ff0100fd310102000000038bf0969b932db9aae1b5532bcc64f8aeb55bab6a420014f66d94aece98cca5c20100000000ffffffff33e589a4f50c49becb7323dc6118c85bcc822f7ba70c0c11997c5b5e9203ce980200000000ffffffffec89f90656e564eff39f00b3276cd75afb3ad5fa2462ec8b8fd464e628ae61630000000000ffffffff049001000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a204e000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a401f000000000000225120dd0db7020be2937c2554d68dc1be856d2483be077f00504b5790aba49fe29e5eca4c010000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a000000000001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012ba086010000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0000000000,
+                  ]
+              threshold:
+                type: number
+                example: 2
+              pending:
+                type: string
+                example: ""
+              createdAt:
+                type: string
+                example: 2024-07-05T05:39:17.564Z
+    getPsbtFromRequest:
+      required:
+        - id
+        - pubKey
+      type: object
+      properties:
+        id:
+          type: string
+          example: 6686bf8b6683b6c56b119f43
+        pubkey:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+    getPsbtFromRequest200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Fetch psbt successfully
+        payload:
+          type: string
+          example: 70736274ff0100fd310102000000038bf0969b932db9aae1b5532bcc64f8aeb55bab6a420014f66d94aece98cca5c20100000000ffffffff33e589a4f50c49becb7323dc6118c85bcc822f7ba70c0c11997c5b5e9203ce980200000000ffffffffec89f90656e564eff39f00b3276cd75afb3ad5fa2462ec8b8fd464e628ae61630000000000ffffffff049001000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a204e000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a401f000000000000225120dd0db7020be2937c2554d68dc1be856d2483be077f00504b5790aba49fe29e5eca4c010000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a000000000001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012ba086010000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0000000000
+    getPsbtFromRequest400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Id or pubkey is missing.
+        payload:
+          type: object
+          example: null
+    updateRequest:
+      required:
+        - psbt
+        - id
+        - pubkey
+      type: object
+      properties:
+        psbt:
+          type: array
+          items:
+            example: 70736274ff0100fd310102000000038bf0969b932db9aae1b5532bcc64f8aeb55bab6a420014f66d94aece98cca5c20100000000ffffffff33e589a4f50c49becb7323dc6118c85bcc822f7ba70c0c11997c5b5e9203ce980200000000ffffffffec89f90656e564eff39f00b3276cd75afb3ad5fa2462ec8b8fd464e628ae61630000000000ffffffff049001000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a204e000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a401f000000000000225120dd0db7020be2937c2554d68dc1be856d2483be077f00504b5790aba49fe29e5eca4c010000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a000000000001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0220203abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a48304502210090abcf53964a34f18bb07b6b99cfb9993f7f03dcc6edd166001e67f254321e6102201a28da118400ef8979c55168cace37ec90094d46107c3fde715e34fb8a4d2f4a01010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012ba086010000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0000000000
+          xml:
+            wrapped: true
+        id:
+          type: string
+          xml:
+            wrapped: true
+          example: 668791f3051db08c6aed8063
+        pubkey:
+          type: string
+          example: 03abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a
+    updateRequest200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Request saved sucessfully
+        payload:
+          type: array
+          items:
+            example:
+              [
+                70736274ff0100fd310102000000038bf0969b932db9aae1b5532bcc64f8aeb55bab6a420014f66d94aece98cca5c20100000000ffffffff33e589a4f50c49becb7323dc6118c85bcc822f7ba70c0c11997c5b5e9203ce980200000000ffffffffec89f90656e564eff39f00b3276cd75afb3ad5fa2462ec8b8fd464e628ae61630000000000ffffffff049001000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a204e000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a401f000000000000225120dd0db7020be2937c2554d68dc1be856d2483be077f00504b5790aba49fe29e5eca4c010000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a000000000001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012ba086010000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0000000000,
+                70736274ff0100fd310102000000038bf0969b932db9aae1b5532bcc64f8aeb55bab6a420014f66d94aece98cca5c20100000000ffffffff33e589a4f50c49becb7323dc6118c85bcc822f7ba70c0c11997c5b5e9203ce980200000000ffffffffec89f90656e564eff39f00b3276cd75afb3ad5fa2462ec8b8fd464e628ae61630000000000ffffffff049001000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a204e000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a401f000000000000225120dd0db7020be2937c2554d68dc1be856d2483be077f00504b5790aba49fe29e5eca4c010000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a000000000001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0220203abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a48304502210090abcf53964a34f18bb07b6b99cfb9993f7f03dcc6edd166001e67f254321e6102201a28da118400ef8979c55168cace37ec90094d46107c3fde715e34fb8a4d2f4a01010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012ba086010000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0000000000,
+              ]
+    updateRequest400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Id, pubkey or psbt is missing.
+        payload:
+          type: object
+          example: null
+    cancelUpdateForRequest:
+      required:
+        - psbt
+        - id
+        - pubkey
+      type: object
+      properties:
+        id:
+          type: string
+          xml:
+            wrapped: true
+          example: 668791f3051db08c6aed8063
+        pubkey:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+    cancelUpdateForRequest200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Cancle request sucessfully
+        payload:
+          type: object
+          example: null
+    cancelUpdateForRequest400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: You didn't fetch this psbt
+        payload:
+          type: object
+          example: null
+    CreateAirdropVault:
+      required:
+        - pubKeyList
+        - minSignCount
+        - assets
+        - creator
+        - imageUrl
+      type: object
+      properties:
+        pubKeyList:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            type: string
+          example:
+            - 03abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a
+            - 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+            - 021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae8
+        minSignCount:
+          type: string
+          example: 2
+        assets:
+          $ref: "#/components/schemas/Assets"
+        creator:
+          $ref: "#/components/schemas/Creator"
+        imageUrl:
+          type: string
+          example: "GDflZCoyJp3dB3PSHNs6JIKSGgqC6coi.png"
+    createNewAirdropVault200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Create Musig Wallet successfully. Rune etching successfully
+        payload:
+          type: object
+          properties:
+            vault:
+              $ref: "#/components/schemas/VaultRespoonse"
+            rune:
+              $ref: "#/components/schemas/RuneRespoonse"
+      xml:
+        name: order
+    CreateAirdropVault400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: These public key pair is already existed.
+        payload:
+          type: object
+          properties:
+            vault:
+              type: object
+              example: null
+            rune:
+              type: object
+              example: null
+    fetchAirdropList200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Fetch wallet list successfully
+        payload:
+          type: array
+          items:
+            type: object
+            properties:
+              creator:
+                $ref: "#/components/schemas/Creator"
+              assets:
+                $ref: "#/components/schemas/Assets"
+              _id:
+                type: string
+                example: 6681c76e679fdb30af1b5a94
+              address:
+                type: string
+                example: tb1q3xdmptl2ta5rfetcc922t7e7xppdqfxnzqg75g9dexprse95nrhqrwp3zf
+              cosigner:
+                type: array
+                items:
+                  type: string
+                example:
+                  - >-
+                    03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+                  - >-
+                    0307b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa69
+                  - >-
+                    02a356f1fb4417c38d9c8a16c4878da5e91196a5b3199fd79a2160d4b1b3ccff4f
+              edition:
+                type: array
+                items:
+                  type: string
+                example:
+                  - >-
+                    03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+                  - >-
+                    0307b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa69
+                  - >-
+                    02a356f1fb4417c38d9c8a16c4878da5e91196a5b3199fd79a2160d4b1b3ccff4f
+              createAt:
+                type: string
+                example: "2024-06-30T20:56:05.458Z"
+              p2msOutput:
+                type: string
+                example: >-
+                  0020899bb0afea5f6834e578c154a5fb3e3042d024d31011ea20adc9823864b498ee
+              threshold:
+                type: number
+                example: 2
+              witnessScript:
+                type: string
+                example: 522103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86210307b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa692102a356f1fb4417c38d9c8a16c4878da5e91196a5b3199fd79a2160d4b1b3ccff4f53ae
+      xml:
+        name: order
+    fetchAridropList500:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: There is Something wrong..
+        payload:
+          type: object
+          example: null
+    mintAirdrop:
+      required:
+        - paymentAddress
+        - paymentPublicKey
+        - ordinalAddress
+        - ordinalPublicKey
+        - walletId
+      type: object
+      properties:
+        paymentAddress:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        paymentPublicKey:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        ordinalAddress:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        ordinalPublicKey:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        walletId:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+    mintAirdrop200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Fetch wallet list successfully
+        payload:
+          type: object
+          properties:
+            psbtHex:
+              type: string
+              example: 70736274ff0100fd4d010200000002fd5defd54ff8fcc885840ca0b22b89f060736d9a6f1ec6edb0901151d41d25760100000000ffffffff8bf0969b932db9aae1b5532bcc64f8aeb55bab6a420014f66d94aece98cca5c20200000000ffffffff060000000000000000116a5d0e00d5fdae010c01020000afea01012202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d4042202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04ad007000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d4040300010000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04ab80b000000000000225120531a17f198d1e68d4a9ad82a86d9ba925d794417028570d6a234e08095f16960000000000001012b2202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d404011340a44a5adf65f6715dfde0ae3b86253a540e2bfc469eef69706220059d278afccbbffb9a9db0643e4b709cab8c30a7b96a2d6d17b66e8c608b26e189cc15fd869b011720481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a860001012b5023010000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a01172032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec200000000000000
+            psbtBase64:
+              type: string
+              example: 70736274ff0100fd4d010200000002fd5defd54ff8fcc885840ca0b22b89f060736d9a6f1ec6edb0901151d41d25760100000000ffffffff8bf0969b932db9aae1b5532bcc64f8aeb55bab6a420014f66d94aece98cca5c20200000000ffffffff060000000000000000116a5d0e00d5fdae010c01020000afea01012202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d4042202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04ad007000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d4040300010000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04ab80b000000000000225120531a17f198d1e68d4a9ad82a86d9ba925d794417028570d6a234e08095f16960000000000001012b2202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d404011340a44a5adf65f6715dfde0ae3b86253a540e2bfc469eef69706220059d278afccbbffb9a9db0643e4b709cab8c30a7b96a2d6d17b66e8c608b26e189cc15fd869b011720481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a860001012b5023010000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a01172032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec200000000000000
+            serverInput:
+              type: array
+              items:
+                type: number
+                example: 1
+            clientInput:
+              type: array
+              items:
+                type: number
+                example: 0
+      xml:
+        name: order
+    mintAirdrop400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: one of input vault is missing..
+        payload:
+          type: object
+          example: null
+      xml:
+        name: order
+    batchTransfer:
+      type: object
+      properties:
+        airdropId:
+          type: string
+          example: 668428b258115039e93022f7
+        unitAmount:
+          type: string
+          example: 200
+        runeId:
+          type: string
+          example: 2822278:2061
+    batchTransfer200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Successfully
+        payload:
+          type: string
+          example: 70736274ff0100fde4010200000002a95db190a76c43ac0e1dae57e56fc5710c69895265c201889e3c0189a1789c530100000000ffffffffa95db190a76c43ac0e1dae57e56fc5710c69895265c201889e3c0189a1789c530800000000ffffffff090000000000000000276a5d240086a1ac018d10f4f105010000c801020000c801030000c801040000c801050000c801062202000000000000220020d4a9e24cd59eb0cd94dab7ed4b3c916b031d68b5d55b48abda9f257a6deaa01e2202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a22020000000000002251201b01daa7e8e0f0c661ad103323b833ab46a032bae9de13386fd16d801ec8f4a22202000000000000225120531a17f198d1e68d4a9ad82a86d9ba925d794417028570d6a234e08095f169602202000000000000225120d56bbf7de9ed5cc398f5769ceba2f4efc41dcecc11825a4fded1359b1e3538dd2202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d404401f000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d404ccdc000000000000220020d4a9e24cd59eb0cd94dab7ed4b3c916b031d68b5d55b48abda9f257a6deaa01e000000000001012b2202000000000000220020d4a9e24cd59eb0cd94dab7ed4b3c916b031d68b5d55b48abda9f257a6deaa01e010525512103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a51ae0001012bd70a010000000000220020d4a9e24cd59eb0cd94dab7ed4b3c916b031d68b5d55b48abda9f257a6deaa01e010525512103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a51ae00000000000000000000
+    batchTransfer400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: one of input vault is missing..
+        payload:
+          type: object
+          example: null
+    broadcasting:
+      type: object
+      properties:
+        psbt:
+          type: string
+          example: 70736274ff0100f802000000020c96e9e1f970418e13a5b14dca0c3010688fe946e6221b14c47544dc3ba81d060100000000ffffffffa9ff140b27ecdc9f222d5a7b2ebe36f36d6b88467cf9e32c8ed3b79e563f6bbe0300000000ffffffff040000000000000000126a5d0f00dbfeab01f7110a020000fe9a04012202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d4042202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a94fa0f0000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a000000000001012b2202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d404011340f5bf53d9adc67ecc52d10a06112f8a795489a84d4348afea4473e194bdeb0512c1026b664e6b3047d28af4f89a40cebf67fd84477ade42426725e3d14c898a9e011720481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a860001012b54ee100000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a01172032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec20000000000
+        signedPsbt:
+          type: string
+          example: 70736274ff0100f802000000020c96e9e1f970418e13a5b14dca0c3010688fe946e6221b14c47544dc3ba81d060100000000ffffffffa9ff140b27ecdc9f222d5a7b2ebe36f36d6b88467cf9e32c8ed3b79e563f6bbe0300000000ffffffff040000000000000000126a5d0f00dbfeab01f7110a020000fe9a04012202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d4042202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a94fa0f0000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a000000000001012b2202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d404011340f5bf53d9adc67ecc52d10a06112f8a795489a84d4348afea4473e194bdeb0512c1026b664e6b3047d28af4f89a40cebf67fd84477ade42426725e3d14c898a9e011720481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a860001012b54ee100000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a011340939b13aea169e4e3f03e41059564881f95df84acea51fbdb5068ac9963d75e005d594f7e286d5dc45cd21d5400497736ed26c4449e4a78f9ff71c49f3e6f218201172032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec20000000000
+        inputsCount:
+          type: number
+          example: 2
+        walletType:
+          type: string
+          example: Unisat
+        ordinalAddress:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        walletId:
+          type: string
+          example: 66793c473ea4fb1d998de3bb
+    broadcasting200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        msg:
+          type: string
+          example: e6b952f0b18832f77061b14cab890cccab795110c79badad11b6464f0dbfb034
+    broadcasting400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Get Error
+        payload:
+          type: object
+          example: null
+    list:
+      type: object
+      properties:
+        sellerOrdinalAddress:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        sellerOrdinalPubkey:
+          type: string
+          example: 0332362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec2
+        sellerPaymentAddress:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        sellerPaymentPubkey:
+          type: string
+          example: 0332362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec2
+        runeId:
+          type: string
+          example: 66793c473ea4fb1d998de3bb
+        sellPrice:
+          type: string
+          example: 9000
+    list200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Your request submitted successfully.
+        payload:
+          type: object
+          properties:
+            createAt:
+              type: string
+              example: 2024-07-09T03:09:04.027Z
+            inputsArray:
+              type: array
+              items:
+                type: number
+              example: []
+            parentAddress:
+              type: string
+              example: tb1q2xse7th83j9qvtxjvddn6vjdp9vf4zx7pqszn08rycxzwjcx7tnqjgycmk
+            psbt:
+              type: string
+              example: ""
+            runeId:
+              type: string
+              example: 2862855:197
+            runeTicker:
+              type: string
+              example: IHATEYOU
+            sellPrice:
+              type: string
+              example: 9000
+            sellerInfo:
+              type: object
+              properties:
+                ordinalAddress:
+                  type: string
+                  example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+                ordinalPublicKey:
+                  type: string
+                  example: 03abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a
+                paymentAddress:
+                  type: string
+                  example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+                paymentPublicKey:
+                  type: string
+                  example: 03abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a
+            status:
+              type: string
+              example: Pending
+            _id:
+              type: string
+              example: 668caa7ae17a7956699eca65
+    list400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: You already request with this.
+        payload:
+          type: object
+          example: null
+    pre_buyList:
+      type: object
+      properties:
+        buyerOrdinalAddress:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        buyerOrdinalPubkey:
+          type: string
+          example: 0332362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec2
+        buyerPaymentAddress:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        buyerPaymentPubkey:
+          type: string
+          example: 0332362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec2
+        listId:
+          type: string
+          example: 668479cd8a6d4c0f384379e4
+    pre_buyList200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Generating PSBT successfully
+        payload:
+          type: object
+          properties:
+            hex:
+              type: string
+              example: 70736274ff0100dd02000000025b44d45cfefd441ff3bfc492f4a646af323c0fdf3cd205387b7a650fc53abe380200000000ffffffff6e4331de162c138f7a4222dee2d9abe9886e3b919b0f8e155cdc92b2450e770e0100000000ffffffff032202000000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072da00f000000000000225120531a17f198d1e68d4a9ad82a86d9ba925d794417028570d6a234e08095f16960761f0f0000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d000000000001012b2202000000000000225120531a17f198d1e68d4a9ad82a86d9ba925d794417028570d6a234e08095f1696001172007b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa690001012b34300f0000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d011720abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a00000000
+            base64:
+              type: string
+              example: cHNidP8BAN0CAAAAAltE1Fz+/UQf87/EkvSmRq8yPA/fPNIFOHt6ZQ/FOr44AgAAAAD/////bkMx3hYsE496QiLe4tmr6YhuO5GbD44VXNySskUOdw4BAAAAAP////8DIgIAAAAAAAAiUSDjenxUV9iHPbhU0K8MLaBBrQZBlyKrPRCrHJdgRhgHLaAPAAAAAAAAIlEgUxoX8ZjR5o1Kmtgqhtm6kl15RBcChXDWojTggJXxaWB2Hw8AAAAAACJRION6fFRX2Ic9uFTQrwwtoEGtBkGXIqs9EKscl2BGGActAAAAAAABASsiAgAAAAAAACJRIFMaF/GY0eaNSprYKobZupJdeUQXAoVw1qI04ICV8WlgARcgB7eAdh1dN7ZC0so6gdzO+xVRTowkiaiWcRoDmysRqmkAAQErNDAPAAAAAAAiUSDjenxUV9iHPbhU0K8MLaBBrQZBlyKrPRCrHJdgRhgHLQEXIKuxtE9lJhMOW4tYC1+H9qlmjWZS7jNrKCy3Jb5kWqtqAAAAAA==
+            buyerInputs:
+              type: array
+              items:
+                type: number
+                example: 1
+            sellerInputs:
+              type: array
+              items:
+                type: number
+                example: 0
+    pre_buyList400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: This request is already accepted by another buyer.
+        payload:
+          type: object
+          example: null
+    ready_buyList:
+      type: object
+      properties:
+        buyerOrdinalAddress:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        buyerOrdinalPubkey:
+          type: string
+          example: 0332362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec2
+        buyerPaymentAddress:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        buyerPaymentPubkey:
+          type: string
+          example: 0332362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec2
+        inputsArray:
+          type: array
+          items:
+            type: number
+            example: 0
+        listId:
+          type: string
+          example: 668479cd8a6d4c0f384379e4
+        psbt:
+          type: string
+          example: 70736274ff0100dd02000000025b44d45cfefd441ff3bfc492f4a646af323c0fdf3cd205387b7a650fc53abe380200000000ffffffff6e4331de162c138f7a4222dee2d9abe9886e3b919b0f8e155cdc92b2450e770e0100000000ffffffff032202000000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072da00f000000000000225120531a17f198d1e68d4a9ad82a86d9ba925d794417028570d6a234e08095f16960761f0f0000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d000000000001012b2202000000000000225120531a17f198d1e68d4a9ad82a86d9ba925d794417028570d6a234e08095f1696001172007b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa690001012b34300f0000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d0113406fa4df166900ecb90bb02d776307a8721d718c62ea4258de884057e40cd61b4bf429ed0f243afb0d22f321070103660d5a6c3c1f3ff219a14320002c62f20ef0011720abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a00000000
+    ready_buyList200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Generating PSBT successfully
+        payload:
+          type: object
+          properties:
+            sellerInfo:
+              $ref: "#/components/schemas/Address"
+            buyerInfo:
+              $ref: "#/components/schemas/Address"
+            psbt:
+              type: string
+              example: 70736274ff0100dd02000000025b44d45cfefd441ff3bfc492f4a646af323c0fdf3cd205387b7a650fc53abe380200000000ffffffff6e4331de162c138f7a4222dee2d9abe9886e3b919b0f8e155cdc92b2450e770e0100000000ffffffff032202000000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072da00f000000000000225120531a17f198d1e68d4a9ad82a86d9ba925d794417028570d6a234e08095f16960761f0f0000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d000000000001012b2202000000000000225120531a17f198d1e68d4a9ad82a86d9ba925d794417028570d6a234e08095f1696001172007b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa690001012b34300f0000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d011720abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a00000000
+            inputsArray:
+              type: array
+              items:
+                type: number
+                example: 0
+            _id:
+              type: string
+              example: 668479cd8a6d4c0f384379e4
+            parentAddress:
+              type: string
+              example: tb1q6j57ynx4n6cvm9x6klk5k0y3dvp3669464d53276nujh5m025q0q2y3w5h
+            runeTicker:
+              type: string
+              example: I.THINK.THIS.IS.WORKING.WELL
+            runeId:
+              type: string
+              example: 2865583:142
+            sellPrice:
+              type: string
+              example: 4000
+            status:
+              type: string
+              example: Ready
+            createdAt:
+              type: string
+              example: 2024-07-02T21:46:42.699Z
+    ready_buyList400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: This request is already accepted by another buyer.
+        payload:
+          type: object
+          example: null
+    fetchList200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Fetching list successfully.
+        payload:
+          type: array
+          items:
+            $ref: "#/components/schemas/ready_buyList200"
+    fetchList400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Network is busy now, plz try it again later.
+        payload:
+          type: object
+          example: null
+    tx_check200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: checked transaction successfully.
+        payload:
+          type: array
+          items:
+            type: string
+            example: 2862855:197
+    tx_check400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Get failure while checking transaction.
+        payload:
+          type: object
+          example: null
+    etch_runeToken:
+      type: object
+      properties:
+        runeName:
+          type: string
+          example: I.CAN.DO.IT.EXACTLY
+        runeAmount:
+          type: string
+          example: 50000
+        runeSymbol:
+          type: string
+          example: $
+        initialPrice:
+          type: string
+          example: 20000
+        creatorAddress:
+          type: string
+          example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+    etch_runeToken200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Generating PSBT successfully
+        payload:
+          type: object
+          properties:
+            txId:
+              type: string
+              example: ""
+            sendBTCTxId:
+              type: string
+              example: 29716e49b28da526059e63b96b329cf6706fcf146416c77bbf3d676d46fd6ef6
+            runeName:
+              type: string
+              example: I.CAN.DO.IT.EXACTLY
+            runeSymbol:
+              type: string
+              example: $
+            initialPrice:
+              type: string
+              example: 20000
+            creatorAddress:
+              type: string
+              example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+            runeid:
+              type: string
+              example: ""
+            runeAmount:
+              type: string
+              example: 50000
+            remainAmount:
+              type: string
+              example: 50000
+            psbt:
+              type: string
+              example: 70736274ff0100dd02000000025b44d45cfefd441ff3bfc492f4a646af323c0fdf3cd205387b7a650fc53abe380200000000ffffffff6e4331de162c138f7a4222dee2d9abe9886e3b919b0f8e155cdc92b2450e770e0100000000ffffffff032202000000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072da00f000000000000225120531a17f198d1e68d4a9ad82a86d9ba925d794417028570d6a234e08095f16960761f0f0000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d000000000001012b2202000000000000225120531a17f198d1e68d4a9ad82a86d9ba925d794417028570d6a234e08095f1696001172007b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa690001012b34300f0000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d011720abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a00000000
+            status:
+              type: string
+              example: Ready
+    etch_runeToken400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Get failure while checking transaction.
+        payload:
+          type: object
+          example: null
+    SyndicateVaultRespoonse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Create Syndicate Wallet successfully.
+        payload:
+          type: object
+          properties:
+            DBID:
+              type: string
+              example: 6686bfc46683b6c56b119f49
+            address:
+              type: string
+              example: tb1qc985rzyegrrqzp2s3f7vae6hnkr2n9gqzr4n4r3r2xmahhn0zp0q804pcg
+      xml:
+        name: order
+    CreateSyndicateVault:
+      required:
+        - pubKeyList
+        - minSignCount
+        - assets
+        - creator
+        - imageUrl
+      type: object
+      properties:
+        pubKeyList:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            type: string
+          example:
+            - 03abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a
+            - 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+            - 021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae8
+        minSignCount:
+          type: string
+          example: 2
+        assets:
+          $ref: "#/components/schemas/Assets"
+        creator:
+          $ref: "#/components/schemas/Creator"
+        imageUrl:
+          type: string
+          example: "GDflZCoyJp3dB3PSHNs6JIKSGgqC6coi.png"
+    createNewSyndicateVault200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Create Syndicate Wallet successfully. Rune etching successfully
+        payload:
+          type: object
+          properties:
+            vault:
+              $ref: "#/components/schemas/SyndicateVaultRespoonse"
+            rune:
+              $ref: "#/components/schemas/RuneRespoonse"
+      xml:
+        name: order
+    fetchSyndicateList200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: fetchSyndicateList list successfully
+        payload:
+          type: array
+          items:
+            type: object
+            properties:
+              creator:
+                $ref: "#/components/schemas/Creator"
+              assets:
+                $ref: "#/components/schemas/Assets"
+              _id:
+                type: string
+                example: 6681c76e679fdb30af1b5a94
+              cosigner:
+                type: array
+                items:
+                  type: string
+                example:
+                  - >-
+                    03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+                  - >-
+                    0307b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa69
+                  - >-
+                    02a356f1fb4417c38d9c8a16c4878da5e91196a5b3199fd79a2160d4b1b3ccff4f
+              witnessScript:
+                type: string
+                example: 522103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86210307b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa692102a356f1fb4417c38d9c8a16c4878da5e91196a5b3199fd79a2160d4b1b3ccff4f53ae
+              p2msOutput:
+                type: string
+                example: >-
+                  0020899bb0afea5f6834e578c154a5fb3e3042d024d31011ea20adc9823864b498ee
+              address:
+                type: string
+                example: tb1q3xdmptl2ta5rfetcc922t7e7xppdqfxnzqg75g9dexprse95nrhqrwp3zf
+              threshold:
+                type: number
+                example: 2
+              edition:
+                type: array
+                items:
+                  type: string
+                example:
+                  - >-
+                    03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+                  - >-
+                    0307b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa69
+                  - >-
+                    02a356f1fb4417c38d9c8a16c4878da5e91196a5b3199fd79a2160d4b1b3ccff4f
+              createAt:
+                type: string
+                example: "2024-06-30T20:56:05.458Z"
+              imageUrl:
+                type: string
+                example: S0orELPvTx5AATJWnxMHXTu1QppNKiIc.png
+      xml:
+        name: order
+    mint:
+      required:
+        - paymentAddress
+        - paymentPublicKey
+        - ordinalAddress
+        - ordinalPublicKey
+        - walletId
+      type: object
+      properties:
+        paymentAddress:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        paymentPublicKey:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        ordinalAddress:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        ordinalPublicKey:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        walletId:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+    mint200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Minting for you successfully
+        payload:
+          type: object
+          properties:
+            psbtHex:
+              type: string
+              example: 70736274ff0100fd4d010200000002fd5defd54ff8fcc885840ca0b22b89f060736d9a6f1ec6edb0901151d41d25760100000000ffffffff8bf0969b932db9aae1b5532bcc64f8aeb55bab6a420014f66d94aece98cca5c20200000000ffffffff060000000000000000116a5d0e00d5fdae010c01020000afea01012202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d4042202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04ad007000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d4040300010000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04ab80b000000000000225120531a17f198d1e68d4a9ad82a86d9ba925d794417028570d6a234e08095f16960000000000001012b2202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d404011340a44a5adf65f6715dfde0ae3b86253a540e2bfc469eef69706220059d278afccbbffb9a9db0643e4b709cab8c30a7b96a2d6d17b66e8c608b26e189cc15fd869b011720481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a860001012b5023010000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a01172032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec200000000000000
+            psbtBase64:
+              type: string
+              example: 70736274ff0100fd4d010200000002fd5defd54ff8fcc885840ca0b22b89f060736d9a6f1ec6edb0901151d41d25760100000000ffffffff8bf0969b932db9aae1b5532bcc64f8aeb55bab6a420014f66d94aece98cca5c20200000000ffffffff060000000000000000116a5d0e00d5fdae010c01020000afea01012202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d4042202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04ad007000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d4040300010000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04ab80b000000000000225120531a17f198d1e68d4a9ad82a86d9ba925d794417028570d6a234e08095f16960000000000001012b2202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d404011340a44a5adf65f6715dfde0ae3b86253a540e2bfc469eef69706220059d278afccbbffb9a9db0643e4b709cab8c30a7b96a2d6d17b66e8c608b26e189cc15fd869b011720481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a860001012b5023010000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a01172032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec200000000000000
+            serverInput:
+              type: array
+              items:
+                type: number
+                example: 1
+            clientInput:
+              type: array
+              items:
+                type: number
+                example: 0
+      xml:
+        name: order
+    mint400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: one of parameter is missing..
+        payload:
+          type: object
+          example: null
+      xml:
+        name: order
+    SyndicateBroadcasting:
+      type: object
+      properties:
+        psbt:
+          type: string
+          example: 70736274ff0100f802000000020c96e9e1f970418e13a5b14dca0c3010688fe946e6221b14c47544dc3ba81d060100000000ffffffffa9ff140b27ecdc9f222d5a7b2ebe36f36d6b88467cf9e32c8ed3b79e563f6bbe0300000000ffffffff040000000000000000126a5d0f00dbfeab01f7110a020000fe9a04012202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d4042202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a94fa0f0000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a000000000001012b2202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d404011340f5bf53d9adc67ecc52d10a06112f8a795489a84d4348afea4473e194bdeb0512c1026b664e6b3047d28af4f89a40cebf67fd84477ade42426725e3d14c898a9e011720481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a860001012b54ee100000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a01172032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec20000000000
+        signedPsbt:
+          type: string
+          example: 70736274ff0100f802000000020c96e9e1f970418e13a5b14dca0c3010688fe946e6221b14c47544dc3ba81d060100000000ffffffffa9ff140b27ecdc9f222d5a7b2ebe36f36d6b88467cf9e32c8ed3b79e563f6bbe0300000000ffffffff040000000000000000126a5d0f00dbfeab01f7110a020000fe9a04012202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d4042202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a94fa0f0000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a000000000001012b2202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d404011340f5bf53d9adc67ecc52d10a06112f8a795489a84d4348afea4473e194bdeb0512c1026b664e6b3047d28af4f89a40cebf67fd84477ade42426725e3d14c898a9e011720481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a860001012b54ee100000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a011340939b13aea169e4e3f03e41059564881f95df84acea51fbdb5068ac9963d75e005d594f7e286d5dc45cd21d5400497736ed26c4449e4a78f9ff71c49f3e6f218201172032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec20000000000
+        inputsCount:
+          type: number
+          example: 2
+        walletType:
+          type: string
+          example: Unisat
+        ordinalAddress:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        walletId:
+          type: string
+          example: 66793c473ea4fb1d998de3bb
+    SyndicateBroadcasting200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Transaction broadcasting successfully.
+        payload:
+          type: string
+          example: e6b952f0b18832f77061b14cab890cccab795110c79badad11b6464f0dbfb034
+    SyndicateBroadcasting400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Get Error
+        payload:
+          type: object
+          example: null
+    SyndicateBatchTransfer:
+      type: object
+      properties:
+        airdropId:
+          type: string
+          example: 668428b258115039e93022f7
+        unitAmount:
+          type: string
+          example: 200
+        ordinalPublicKey:
+          type: string
+          example: 0307b780761d5d37b642d2ca3a81dccefb15514e8c2489a896711a039b2b11aa69
+        runeId:
+          type: string
+          example: 2822278:2061
+    SyndicateBatchTransfer200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Syndicate psbt generated Successfully.
+        payload:
+          type: string
+          example: 70736274ff0100fde4010200000002a95db190a76c43ac0e1dae57e56fc5710c69895265c201889e3c0189a1789c530100000000ffffffffa95db190a76c43ac0e1dae57e56fc5710c69895265c201889e3c0189a1789c530800000000ffffffff090000000000000000276a5d240086a1ac018d10f4f105010000c801020000c801030000c801040000c801050000c801062202000000000000220020d4a9e24cd59eb0cd94dab7ed4b3c916b031d68b5d55b48abda9f257a6deaa01e2202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a22020000000000002251201b01daa7e8e0f0c661ad103323b833ab46a032bae9de13386fd16d801ec8f4a22202000000000000225120531a17f198d1e68d4a9ad82a86d9ba925d794417028570d6a234e08095f169602202000000000000225120d56bbf7de9ed5cc398f5769ceba2f4efc41dcecc11825a4fded1359b1e3538dd2202000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d404401f000000000000225120c4d10b54abbd8f9a6d536a40c2c098fac721d4667846ebb86a56f92f94a4d404ccdc000000000000220020d4a9e24cd59eb0cd94dab7ed4b3c916b031d68b5d55b48abda9f257a6deaa01e000000000001012b2202000000000000220020d4a9e24cd59eb0cd94dab7ed4b3c916b031d68b5d55b48abda9f257a6deaa01e010525512103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a51ae0001012bd70a010000000000220020d4a9e24cd59eb0cd94dab7ed4b3c916b031d68b5d55b48abda9f257a6deaa01e010525512103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a51ae00000000000000000000
+    SyndicateBatchTransfer400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: one of input vault is missing..
+        payload:
+          type: object
+          example: null
+    updateSyndicateRequest:
+      required:
+        - psbt
+        - id
+        - pubkey
+      type: object
+      properties:
+        psbt:
+          type: array
+          items:
+            example: 70736274ff0100fd310102000000038bf0969b932db9aae1b5532bcc64f8aeb55bab6a420014f66d94aece98cca5c20100000000ffffffff33e589a4f50c49becb7323dc6118c85bcc822f7ba70c0c11997c5b5e9203ce980200000000ffffffffec89f90656e564eff39f00b3276cd75afb3ad5fa2462ec8b8fd464e628ae61630000000000ffffffff049001000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a204e000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a401f000000000000225120dd0db7020be2937c2554d68dc1be856d2483be077f00504b5790aba49fe29e5eca4c010000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a000000000001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0220203abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a48304502210090abcf53964a34f18bb07b6b99cfb9993f7f03dcc6edd166001e67f254321e6102201a28da118400ef8979c55168cace37ec90094d46107c3fde715e34fb8a4d2f4a01010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012ba086010000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0000000000
+          xml:
+            wrapped: true
+        id:
+          type: string
+          xml:
+            wrapped: true
+          example: 668791f3051db08c6aed8063
+        pubkey:
+          type: string
+          example: 03abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a
+    updateSyndicateRequest200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Request saved sucessfully
+        payload:
+          type: array
+          items:
+            type: string
+          example:
+              - 70736274ff0100fd310102000000038bf0969b932db9aae1b5532bcc64f8aeb55bab6a420014f66d94aece98cca5c20100000000ffffffff33e589a4f50c49becb7323dc6118c85bcc822f7ba70c0c11997c5b5e9203ce980200000000ffffffffec89f90656e564eff39f00b3276cd75afb3ad5fa2462ec8b8fd464e628ae61630000000000ffffffff049001000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a204e000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a401f000000000000225120dd0db7020be2937c2554d68dc1be856d2483be077f00504b5790aba49fe29e5eca4c010000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a000000000001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012ba086010000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0000000000,
+              - 70736274ff0100fd310102000000038bf0969b932db9aae1b5532bcc64f8aeb55bab6a420014f66d94aece98cca5c20100000000ffffffff33e589a4f50c49becb7323dc6118c85bcc822f7ba70c0c11997c5b5e9203ce980200000000ffffffffec89f90656e564eff39f00b3276cd75afb3ad5fa2462ec8b8fd464e628ae61630000000000ffffffff049001000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a204e000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a401f000000000000225120dd0db7020be2937c2554d68dc1be856d2483be077f00504b5790aba49fe29e5eca4c010000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a000000000001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0220203abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a48304502210090abcf53964a34f18bb07b6b99cfb9993f7f03dcc6edd166001e67f254321e6102201a28da118400ef8979c55168cace37ec90094d46107c3fde715e34fb8a4d2f4a01010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012ba086010000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0000000000,
+    updateSyndicateRequest400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Id, pubkey or psbt is missing.
+        payload:
+          type: object
+          example: null
+    fetchSyndicateRequestList200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Fetch all request successfully.
+        payload:
+          type: array
+          items:
+            type: object
+            properties:
+              assets:
+                $ref: "#/components/schemas/Assets"
+              _id:
+                type: string
+                example: 668787fa55b8778f50981d34
+              type:
+                type: string
+                example: Batch Airdrop
+              vaultAddress:
+                type: string
+                example: tb1q7g2u8yy7saf9ezuzuhwjrequ0mv4x39xl0yetrp9a4pawg74nr3sgzl4ws
+              runeId:
+                type: string
+                example: 2822225:251
+              transferAmount:
+                type: string
+                example: 300
+              edition:
+                type: array
+                items:
+                  type: string
+                example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v, tb1p644m7l0fa4wv8x84w6wwhgh5alzpmnkvzxp95n776y6ek8348rwsamh86h
+              creator:
+                type: string
+                example: tb1p644m7l0fa4wv8x84w6wwhgh5alzpmnkvzxp95n776y6ek8348rwsamh86h
+              cosigner:
+                type: array
+                items:
+                  type: string
+                example:
+                  [
+                    03abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a,
+                    03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86,
+                  ]
+              signedCosigner:
+                type: array
+                items:
+                  type: string
+                example: []
+              psbt:
+                type: array
+                items:
+                  type: string
+                example:
+                  [
+                    70736274ff0100fd310102000000038bf0969b932db9aae1b5532bcc64f8aeb55bab6a420014f66d94aece98cca5c20100000000ffffffff33e589a4f50c49becb7323dc6118c85bcc822f7ba70c0c11997c5b5e9203ce980200000000ffffffffec89f90656e564eff39f00b3276cd75afb3ad5fa2462ec8b8fd464e628ae61630000000000ffffffff049001000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a204e000000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a401f000000000000225120dd0db7020be2937c2554d68dc1be856d2483be077f00504b5790aba49fe29e5eca4c010000000000220020a9a05d7a51d684910057e898195294daa558919860ee2bb908d59131dafaeb0a000000000001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012b2202000000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0001012ba086010000000000220020ae37dd3248538e8d802755f2c4008fd8613b6240ef890e73cfd682b3539f2aa0010569522103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a2103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8621021fd26edce3324548565721728c72d9087471e127d3f4e093e78b04f4dad9aae853ae0000000000,
+                  ]
+              threshold:
+                type: number
+                example: 2
+              pending:
+                type: string
+                example: ""
+              createdAt:
+                type: string
+                example: 2024-07-05T05:39:17.564Z
+    sendBtc:
+      required:
+        - walletId
+        - destination
+        - amount
+        - paymentAddress
+        - pubKey
+        - vaultType
+      type: object
+      properties:
+        amount:
+          type: string
+          example: 3000
+        destination:
+          type: string
+          example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+        paymentAddress:
+          type: string
+          example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+        pubKey:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+        vaultType:
+          type: string
+          example: Taproot
+        walletId:
+          type: string
+          example: 66b9445b04f9fd5be3ab2f05
+    sendBtcResponse200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: send PSBT is made successfully
+        payload:
+          type: string
+          example: 70736274ff0100890200000001bb2d209e1063cee5272998d03ba88a97cbcd6faa1605a42eae0799d21a648b180100000000ffffffff02b80b000000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d023d00000000000022512019f0372205f0c45479df59fe1ba7afea030039772bdc597b2b8ac613aa5adf28000000000001012b016500000000000022512019f0372205f0c45479df59fe1ba7afea030039772bdc597b2b8ac613aa5adf282215c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0692032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec2ac20481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86ba20abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6aba53a2c0000000
+    sendBtcResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: There is no wallet with this id.
+        payload:
+          type: object
+          example: null
+    sendRune:
+      required:
+        - walletId
+        - destination
+        - amount
+        - runeId
+        - paymentAddress
+        - pubKey
+        - vaultType
+      type: object
+      properties:
+        amount:
+          type: string
+          example: 300
+        destination:
+          type: string
+          example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+        ordinalAddress:
+          type: string
+          example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+        ordinalPublicKey:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+        runeId:
+          type: string
+          example: 2822246:89
+        vaultType:
+          type: string
+          example: Taproot
+        walletId:
+          type: string
+          example: 66b9445b04f9fd5be3ab2f05
+    sendRuneResponse200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: send PSBT is made successfully
+        payload:
+          type: string
+          example: 70736274ff0100890200000001bb2d209e1063cee5272998d03ba88a97cbcd6faa1605a42eae0799d21a648b180100000000ffffffff02b80b000000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d023d00000000000022512019f0372205f0c45479df59fe1ba7afea030039772bdc597b2b8ac613aa5adf28000000000001012b016500000000000022512019f0372205f0c45479df59fe1ba7afea030039772bdc597b2b8ac613aa5adf282215c150929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0692032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec2ac20481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86ba20abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6aba53a2c0000000
+    sendRuneResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: There is no wallet with this id.
+        payload:
+          type: object
+          example: null
+          
+    CreateStakingVault:
+      required:
+        - imageUrl
+        - stakableRuneId
+        - rewardRuneId
+        - rewardRate
+        - liveTime
+        - claimableMinTime
+        - paymentAddress
+        - paymentPublicKey
+        - ordinalAddress
+        - ordinalPublicKey
+      type: object
+      properties:
+        imageUrl:
+          type: string
+          example: imageUrl.png
+        stakableRuneId:
+          type: string
+          example: 2821452:123
+        rewardRuneId:
+          type: string
+          example: 2821452:12
+        rewardRate:
+          type: number
+          example: 100
+        liveTime:
+          type: number
+          example: 50
+        claimableMinTime:
+          type: number
+          example: 600
+        paymentAddress:
+          type: string
+          example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+        paymentPublicKey:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+        ordinalAddress:
+          type: string
+          example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+        ordinalPublicKey:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+    CreateStakingVaultResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Generated successfully.
+        payload:
+          type: string
+          example: 66c3b4272fdf9e8275591cf0
+    CreateStakingVaultResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: stakableRune is missed from input.
+        payload:
+          type: string
+          example: null
+    CreateChildStakingVault:
+      required:
+        - parentId
+        - paymentAddress
+        - paymentPublicKey
+        - ordinalAddress
+        - ordinalPublicKey
+      type: object
+      properties:
+        parentId:
+          type: string
+          example: 66bc44641fe8fff425a20d53
+        paymentAddress:
+          type: string
+          example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+        paymentPublicKey:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+        ordinalAddress:
+          type: string
+          example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+        ordinalPublicKey:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+    CreateChildStakingVaultResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Create Staking Child Successfully.
+        payload:
+          type: string
+          example: 66bc44641fe8fff425a20d53
+    CreateChildStakingVaultResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: parentId is missed from input.
+        payload:
+          type: string
+          example: null
+    calcTvl:
+      required:
+        - parentId
+      type: object
+      properties:
+        parentId:
+          type: string
+          example: 66bc44641fe8fff425a20d53
+    calcTvlResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: TVL calculation Successfully.
+        payload:
+          type: string
+          example: 3500
+    calcTvlResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: parentId is missed from input.
+        payload:
+          type: string
+          example: null
+    preStake:
+      required:
+        - ordinalAddress
+        - ordinalPublicKey
+        - paymentAddress
+        - paymentPublicKey
+        - parentId
+        - amount
+      type: object
+      properties:
+        parentId:
+          type: string
+          example: 66bc44641fe8fff425a20d53
+        amount:
+          type: string
+          example: 66bc44641fe8fff425a20d53
+        paymentAddress:
+          type: string
+          example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+        paymentPublicKey:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+        ordinalAddress:
+          type: string
+          example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+        ordinalPublicKey:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+    preStakeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Generating PSBT successfully
+        payload:
+          type: object
+          properties:
+            psbt:
+              type: string
+              example: 70736274ff0100f6020000000285fd89799bb5cf68b9f3a64533fb0f9bf48bb3379d5e3f7df66a3cc086aacfdd0100000000ffffffff85fd89799bb5cf68b9f3a64533fb0f9bf48bb3379d5e3f7df66a3cc086aacfdd0300000000ffffffff040000000000000000106a5d0d00cc9aac017b64020000fa01012202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a2202000000000000225120b0828053e51378143e369679e3e2604489c0e6797dac09c4a62b0315f1f98b99e295000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a000000000001012b2202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a01172032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec20001012beaef000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a0000000000
+            id:
+              type: string
+              example: 66c4e71d9d8b5ee3276b64ad
+    preStakeResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: parentId is missed from input.
+        payload:
+          type: string
+          example: null
+    stake:
+      required:
+        - signedPsbt
+        - stakingListId
+      type: object
+      properties:
+        signedPsbt:
+          type: string
+          example: 70736274ff0100f6020000000285fd89799bb5cf68b9f3a64533fb0f9bf48bb3379d5e3f7df66a3cc086aacfdd0100000000ffffffff85fd89799bb5cf68b9f3a64533fb0f9bf48bb3379d5e3f7df66a3cc086aacfdd0300000000ffffffff040000000000000000106a5d0d00cc9aac017b64020000fa01012202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a2202000000000000225120b0828053e51378143e369679e3e2604489c0e6797dac09c4a62b0315f1f98b99e295000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a000000000001012b2202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a0113409d0db89973f904100d0af2b1fe4484ace4165c85bb1cfdd2202454d150221fd691699b2c3a1612a1f76936806a82069cbb7cb811c903180db7f7a1f7d0b75b3901172032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec20001012beaef000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a011340c91d5165bc19ffb770b7ccf25362a5092047474b6d7ce1bf5c2c3366ed182850d8236d47208aada010718266f684abb49148508caddd0d03032992ff57b5f40601172032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec20000000000
+        stakingListId:
+          type: string
+          example: 66c4e71d9d8b5ee3276b64ad
+    stakeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Transaction is broadcasting successfully
+        payload:
+          type: string
+          example: 0907356806d1d08d18ce45ce749b2d7b7e66639f777173b4a4d1c6b8f1078f35
+    stakeResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: stakingListId is missed from input.
+        payload:
+          type: string
+          example: null
+    claim:
+      required:
+        - ordinalAddress
+        - ordinalPublicKey
+        - paymentAddress
+        - paymentPublicKey
+        - parentId
+        - rewardAddress
+        - childId
+      type: object
+      properties:
+        parentId:
+          type: string
+          example: 66bc44641fe8fff425a20d53
+        childId:
+          type: string
+          example: 66c4e71c9d8b5ee3276b64aa
+        rewardAddress:
+          type: string
+          example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+        paymentAddress:
+          type: string
+          example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+        paymentPublicKey:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+        ordinalAddress:
+          type: string
+          example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+        ordinalPublicKey:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+    claimResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Claim Request is saved successfully.
+        payload:
+          type: array
+          items:
+            type: object
+            properties:
+              parentId:
+                type: string
+                example: 66c399e845a7ded294751390
+              _id:
+                type: string
+                example: 66c4622a72e964e3a6c93e9b
+              childId:
+                type: string
+                example: 66c439b3a0f169e48bc524f6
+              rewardAddress:
+                type: string
+                example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+              rewardAmount:
+                type: number
+                example: 70
+              requestAddress:
+                type: string
+                example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+              createdAt:
+                type: string
+                example: 2024-08-20T09:21:26.506Z
+              claimed:
+                type: boolean
+                example: false
+              __v:
+                type: string
+                example: 66c4622a72e964e3a6c93e9b
+              claimedDate:
+                type: string
+                example: 2024-08-20T11:10:31.306Z
+    claimResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: parentId is missed from input.
+        payload:
+          type: string
+          example: null
+    approveClaimRequest:
+      required:
+        - ordinalAddress
+        - ordinalPublicKey
+        - paymentAddress
+        - paymentPublicKey
+        - parentId
+      type: object
+      properties:
+        parentId:
+          type: string
+          example: 66bc44641fe8fff425a20d53
+        paymentAddress:
+          type: string
+          example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+        paymentPublicKey:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+        ordinalAddress:
+          type: string
+          example: tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f
+        ordinalPublicKey:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+    approveClaimRequestResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Successfully.
+        payload:
+          type: string
+          example: 70736274ff0100f60200000002bf532a9b342291fa31fadd94a6a2fd42de9edf47115c2faae942cf4500d45b620200000000ffffffff9aed7cb454a88a31a1004f8032339eb18eb92cc743d3e5a049127bc0e3df0fca0000000000ffffffff042202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a2202000000000000220020e062cf209a7a9e4da2e5234fd7a58bef7ff550f532fa416a3b3aa692ace864860000000000000000106a5d0d00d5fdae010c46000000e6010174b8000000000000220020e062cf209a7a9e4da2e5234fd7a58bef7ff550f532fa416a3b3aa692ace86486000000000001012b2202000000000000220020e062cf209a7a9e4da2e5234fd7a58bef7ff550f532fa416a3b3aa692ace86486010569522103cbf488e5cd21eab93492d237b44f26b623e99fc209eb64a6a901a2655955b08821026aead9346ae002e9fd39dffce8f2487503f62c8dc55bf49de4bbff963d572c982103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8653ae0001012b7011010000000000220020e062cf209a7a9e4da2e5234fd7a58bef7ff550f532fa416a3b3aa692ace86486010569522103cbf488e5cd21eab93492d237b44f26b623e99fc209eb64a6a901a2655955b08821026aead9346ae002e9fd39dffce8f2487503f62c8dc55bf49de4bbff963d572c982103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8653ae0000000000
+    approveClaimRequestResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: parentId is missed from input.
+        payload:
+          type: string
+          example: null
+    approveClaimBroadcastingRequest:
+      required:
+        - psbt
+        - childId
+        - parentId
+      type: object
+      properties:
+        parentId:
+          type: string
+          example: 66c399e845a7ded294751390
+        psbt:
+          type: string
+          example: 70736274ff0100f60200000002bf532a9b342291fa31fadd94a6a2fd42de9edf47115c2faae942cf4500d45b620200000000ffffffff9aed7cb454a88a31a1004f8032339eb18eb92cc743d3e5a049127bc0e3df0fca0000000000ffffffff042202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a2202000000000000220020e062cf209a7a9e4da2e5234fd7a58bef7ff550f532fa416a3b3aa692ace864860000000000000000106a5d0d00d5fdae010c46000000e6010174b8000000000000220020e062cf209a7a9e4da2e5234fd7a58bef7ff550f532fa416a3b3aa692ace86486000000000001012b2202000000000000220020e062cf209a7a9e4da2e5234fd7a58bef7ff550f532fa416a3b3aa692ace86486220203481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86483045022100a0232b78dc6104c61136851e792750c99fecaacce94eff236d29e13f6ad217a70220217279219fab13c065faec388fe5333ceebf26221025c4465b1d95593471e87901010569522103cbf488e5cd21eab93492d237b44f26b623e99fc209eb64a6a901a2655955b08821026aead9346ae002e9fd39dffce8f2487503f62c8dc55bf49de4bbff963d572c982103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8653ae0001012b7011010000000000220020e062cf209a7a9e4da2e5234fd7a58bef7ff550f532fa416a3b3aa692ace86486220203481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86483045022100a0420b164e03bcfb5b2846ce880d142c1424df36fe5e6c46641e086adce539b602205f3bcb00337df830eb0987f283d50869d7817841cdb20b47b01d01291e3c352401010569522103cbf488e5cd21eab93492d237b44f26b623e99fc209eb64a6a901a2655955b08821026aead9346ae002e9fd39dffce8f2487503f62c8dc55bf49de4bbff963d572c982103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a8653ae0000000000
+        childId:
+          type: string
+          example: 03481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a86
+    approveClaimBroadcastingResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Transaction broadcasted successfully..
+        payload:
+          type: string
+          example: f8f55393cb0766c00dc9f865a8336b4b89a982dd8e2f1e22ec3d4a133b9d646b
+    approveClaimBroadcastingResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: parentId is missed from input.
+        payload:
+          type: string
+          example: 
+    unstakingRequest:
+      required:
+        - ordinalAddress
+        - ordinalPublicKey
+        - paymentAddress
+        - paymentPublicKey
+        - parentId
+        - childId
+      type: object
+      properties:
+        parentId:
+          type: string
+          example: 66bc44641fe8fff425a20d53
+        childId:
+          type: string
+          example: 66c439b3a0f169e48bc524f6
+        paymentAddress:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        paymentPublicKey:
+          type: string
+          example: 0332362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec2
+        ordinalAddress:
+          type: string
+          example: tb1pujt7zt5s5w3jcszk3m7vl6p7rjw6rshzy6wk9svkx4jv3zxd5p9qzenv8v
+        ordinalPublicKey:
+          type: string
+          example: 0332362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec2
+    unstakingResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Transaction broadcasted successfully..
+        payload:
+          type: object
+          properties:
+            psbt:
+              type: string
+              example: 70736274ff0100b2020000000285fd89799bb5cf68b9f3a64533fb0f9bf48bb3379d5e3f7df66a3cc086aacfdd0200000000ffffffff358f07f1b8c6d1a4b47371779f63667e7b2d9b74ce45ce188dd0d106683507090300000000ffffffff022202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04ab36d000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a000000000001012b2202000000000000225120d1ed66fb26d0a3d1873d861cfa5bd477938e4e72249a6998906e02be3c612a98011720aacc98537644029f60b4632207d7dfc251ca8cc23a39e1d9fe063db97c3f627c0001012be295000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a01172032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec2000000
+            clientInput:
+              type: array
+              items:
+                type: number
+                example: 1
+            serverInput:
+              type: array
+              items:
+                type: number
+                example: 0
+    unstakingResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: parentId is missed from input.
+        payload:
+          type: string
+          example: null
+    unstakingBroadcastingRequest:
+      required:
+        - signedPsbt
+        - childId
+        - serverInput
+      type: object
+      properties:
+        signedPsbt:
+          type: string
+          example: 70736274ff0100b2020000000285fd89799bb5cf68b9f3a64533fb0f9bf48bb3379d5e3f7df66a3cc086aacfdd0200000000ffffffff358f07f1b8c6d1a4b47371779f63667e7b2d9b74ce45ce188dd0d106683507090300000000ffffffff022202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04ab36d000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a000000000001012b2202000000000000225120d1ed66fb26d0a3d1873d861cfa5bd477938e4e72249a6998906e02be3c612a98011720aacc98537644029f60b4632207d7dfc251ca8cc23a39e1d9fe063db97c3f627c0001012be295000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a011340331bae3b2068e69ac7765d7bd571411188961feef72e005b18de7fef4a206235e00f49f3ecea738cafc383ca47cfab4765d70664945a9be0ba731b2a01bdde8501172032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec2000000
+        childId:
+          type: string
+          example: 66c439b3a0f169e48bc524f6
+        serverInput:
+          type: array
+          items:
+            type: number
+            example: 0
+    unstakingBroadcastingResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Transaction broadcasted successfully..
+        payload:
+          type: object
+          properties:
+            psbt:
+              type: string
+              example: 70736274ff0100b2020000000285fd89799bb5cf68b9f3a64533fb0f9bf48bb3379d5e3f7df66a3cc086aacfdd0200000000ffffffff358f07f1b8c6d1a4b47371779f63667e7b2d9b74ce45ce188dd0d106683507090300000000ffffffff022202000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04ab36d000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a000000000001012b2202000000000000225120d1ed66fb26d0a3d1873d861cfa5bd477938e4e72249a6998906e02be3c612a98011720aacc98537644029f60b4632207d7dfc251ca8cc23a39e1d9fe063db97c3f627c0001012be295000000000000225120e497e12e90a3a32c40568efccfe83e1c9da1c2e2269d62c1963564c888cda04a01172032362069574f88b2960e6c9c3491521b01ef32d913ec0f8ce6940eb89b7f7ec2000000
+            clientInput:
+              type: array
+              items:
+                type: number
+                example: 1
+            serverInput:
+              type: array
+              items:
+                type: number
+                example: 0
+    unstakingBroadcastingResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: parentId is missed from input.
+        payload:
+          type: string
+          example: null
+    checkingBrc20:
+      required:
+        - multisigId
+        - address
+        - ticker
+        - amount
+        - paymentAddress
+        - paymentPublicKey
+      type: object
+      properties:
+        multisigId:
+          type: string
+          example: 668e250899cc6b58cebaa48a
+        address:
+          type: string
+          example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+        ticker:
+          type: string
+          example: DDDB
+        amount:
+          type: string
+          example: 30
+        paymentAddress:
+          type: string
+          example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+        paymentPublicKey:
+          type: string
+          example: 03abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a
+    checkingBrc20Response200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: There is no existed request with these parameters
+        payload:
+          type: object
+          example: null
+    checkingBrc20Response400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: There is already same request in DB.
+        payload:
+          type: string
+          example: 66e9f01b44686c3169eebcc1
+    sendBrc20NS:
+      required:
+        - vaultId
+        - inscriptionId
+        - destination
+        - ticker
+        - amount
+        - paymentAddress
+      type: object
+      properties:
+        vaultId:
+          type: string
+          example: 668e250899cc6b58cebaa48a
+        inscriptionId:
+          type: string
+          example: 6bbc5f9c25b4a1cf252b552db456eddb945f1f2437d3e7b367d49bd0db9e7bbci0
+        destination:
+          type: string
+          example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+        ticker:
+          type: string
+          example: DDDB
+        amount:
+          type: string
+          example: 30
+        paymentAddress:
+          type: string
+          example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+    sendBrc20NSResponse200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Send brc20 request saved successfully.
+        payload:
+          type: object
+          example: 70736274ff0100b20200000002b794df8ba632188b0124775fcc6cc649a77a7e5c023d628912ac61a6f49bfeb50000000000ffffffffc8e91883c0d481528e1cca1a306b0fcf17da05897f310337d9ad12db4ac108f30100000000ffffffff022202000000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d884feb0500000000220020dc898110b826f8995be2ae34fc714ad6713d25309ae6f37ffd383c125144fc43000000000001012b2202000000000000220020dc898110b826f8995be2ae34fc714ad6713d25309ae6f37ffd383c125144fc43010547522103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a862103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a52ae0001012b08f2eb0500000000220020dc898110b826f8995be2ae34fc714ad6713d25309ae6f37ffd383c125144fc43010547522103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a862103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a52ae000000
+    sendBrc20NSResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: There is no wallet with this id.
+        payload:
+          type: object
+          example: null
+    getBtcAndRuneByAddress:
+      required:
+        - Address
+      type: object
+      properties:
+        address:
+          type: string
+          example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+    getBtcAndRuneByAddressResponse200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Get Btc and Rune failed.
+        payload:
+          type: object
+          properties:
+            btcBalance:
+              type: number
+              example: 99372405
+            runeBalance:
+              type: array
+              items:
+                type: object
+                properties:
+                  rune:
+                    type: string
+                    example: ICANDOITABSOLUTELY
+                  runeid:
+                    type: string
+                    example: 2821452:123
+                  spacedRune:
+                    type: string
+                    example: I•CAN•DO•IT•ABSOLUTELY
+                  amount:
+                    type: number
+                    example: 2500
+                  symbol:
+                    type: string
+                    example: $
+                  divisibility:
+                    type: number
+                    example: 0
+            ordinalsList:
+              type: array
+              items:
+                type: object
+                properties:
+                  inscriptionNumber:
+                    type: number
+                    example: 98079689
+                  inscriptionId:
+                    type: string
+                    example: 78368586cca506823619a518bfd9951835510e6d64207a814cf705c951138238i0
+    getBtcAndRuneByAddressResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Get Btc and Rune failed.
+        payload:
+          type: object
+          example: null
+    sendordinalsNS:
+      required:
+        - vaultId
+        - destination
+        - inscriptionId
+        - paymentAddress
+      type: object
+      properties:
+        vaultId:
+          type: string
+          example: 668e250899cc6b58cebaa48a
+        inscriptionId:
+          type: string
+          example: 6bbc5f9c25b4a1cf252b552db456eddb945f1f2437d3e7b367d49bd0db9e7bbci0
+        destination:
+          type: string
+          example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+        paymentAddress:
+          type: string
+          example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+    sendordinalsNSResponse200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Send ordinals request saved successfully.
+        payload:
+          type: object
+          example: 70736274ff0100b20200000002b794df8ba632188b0124775fcc6cc649a77a7e5c023d628912ac61a6f49bfeb50000000000ffffffffc8e91883c0d481528e1cca1a306b0fcf17da05897f310337d9ad12db4ac108f30100000000ffffffff022202000000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d884feb0500000000220020dc898110b826f8995be2ae34fc714ad6713d25309ae6f37ffd383c125144fc43000000000001012b2202000000000000220020dc898110b826f8995be2ae34fc714ad6713d25309ae6f37ffd383c125144fc43010547522103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a862103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a52ae0001012b08f2eb0500000000220020dc898110b826f8995be2ae34fc714ad6713d25309ae6f37ffd383c125144fc43010547522103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a862103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a52ae000000
+    sendordinalsNSResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: There is no wallet with this id.
+        payload:
+          type: object
+          example: null
+    preTapInscribe:
+      required:
+        - paymentAddress
+        - paymentPublicKey
+        - itemList
+      type: object
+      properties:
+        paymentAddress:
+          type: string
+          example: 668e250899cc6b58cebaa48a
+        paymentPublicKey:
+          type: string
+          example: 6bbc5f9c25b4a1cf252b552db456eddb945f1f2437d3e7b367d49bd0db9e7bbci0
+        itemList:
+          type: array
+          items:
+            type: object
+            properties:
+              address:
+                type: string
+                example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+              amt:
+                type: string
+                example: 45
+              tick:
+                type: string
+                example: tapis
+    preTapInscribeResponse200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Success
+        payload:
+          type: object
+          properties:
+            amount:
+              type: number
+              example: 138054
+            privateKey:
+              type: string
+              example: cNGkTkmJYYbjXvh2VjKrd3bG31xgU98F3Z2Nnj9tkiL8iDJKDLKz
+            psbt:
+              type: string
+              example: 70736274ff0100890200000001f85266a216f831e8540930a0d3f10031605ee2962d6267af8bb8cfd1b881579a0100000000ffffffff02461b020000000000225120f635d83f5719bc38e7537eacd38229e2802c406a69bd79a18a2c17bfc73a844f1091a21400000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d000000000001012b2eb2a51400000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d011720abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a000000
+    preTapInscribeResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: There is no itemList value.
+        payload:
+          type: object
+          example: null
+    tapInscribe:
+      required:
+        - amount
+        - hexedPsbt
+        - itemList
+        - privateKey
+        - receiveAddress
+        - signedHexedPsbt
+      type: object
+      properties:
+        amount:
+          type: number
+          example: 138054
+        hexedPsbt:
+          type: string
+          example: 70736274ff0100890200000001f85266a216f831e8540930a0d3f10031605ee2962d6267af8bb8cfd1b881579a0100000000ffffffff02461b020000000000225120f635d83f5719bc38e7537eacd38229e2802c406a69bd79a18a2c17bfc73a844f1091a21400000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d000000000001012b2eb2a51400000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d011720abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a000000
+        itemList:
+          type: array
+          items:
+            type: object
+            properties:
+              address:
+                type: string
+                example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+              amt:
+                type: string
+                example: 45
+              tick:
+                type: string
+                example: tapis
+    tapInscribeResponse200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Transaction is broadcasted successfuly.
+        payload:
+          type: object
+          example: 6bbc5f9c25b4a1cf252b552db456eddb945f1f2437d3e7b367d49bd0db9e7bbci0
+    tapInscribeResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Transaction broadcasting get failed.
+        payload:
+          type: object
+          example: null
+    sendTapOrdinalsNS:
+      required:
+        - vaultId
+        - inscriptionId
+        - paymentAddress
+        - ordinalAddress
+      type: object
+      properties:
+        vaultId:
+          type: string
+          example: 668e250899cc6b58cebaa48a
+        inscriptionId:
+          type: string
+          example: 6bbc5f9c25b4a1cf252b552db456eddb945f1f2437d3e7b367d49bd0db9e7bbci0
+        ordinalAddress:
+          type: string
+          example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+        paymentAddress:
+          type: string
+          example: tb1puda8c4zhmzrnmwz56zhsctdqgxksvsvhy24n6y9trjtkq3scquksvlld50
+    sendTapOrdinalsNSResponse200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Send Tap inscription request saved successfully.
+        payload:
+          type: object
+          example: 70736274ff0100b20200000002b794df8ba632188b0124775fcc6cc649a77a7e5c023d628912ac61a6f49bfeb50000000000ffffffffc8e91883c0d481528e1cca1a306b0fcf17da05897f310337d9ad12db4ac108f30100000000ffffffff022202000000000000225120e37a7c5457d8873db854d0af0c2da041ad06419722ab3d10ab1c97604618072d884feb0500000000220020dc898110b826f8995be2ae34fc714ad6713d25309ae6f37ffd383c125144fc43000000000001012b2202000000000000220020dc898110b826f8995be2ae34fc714ad6713d25309ae6f37ffd383c125144fc43010547522103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a862103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a52ae0001012b08f2eb0500000000220020dc898110b826f8995be2ae34fc714ad6713d25309ae6f37ffd383c125144fc43010547522103481dd46ed4bfa803d6408a8294a678251a2869f8d24f0a0935899404b7f35a862103abb1b44f6526130e5b8b580b5f87f6a9668d6652ee336b282cb725be645aab6a52ae000000
+    sendTapOrdinalsNSResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: There is no inscriptionId value.
+        payload:
+          type: object
+          example: null      
+    getTapAssets:
+      required:
+        - address
+      type: object
+      properties:
+        address:
+          type: string
+          example: tb1qmjyczy9cymufjklz4c60cu226ecn6ffsntn0xlla8q7py52yl3psgh66tg
+    getTapAssetsResponse200:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Fetch Tap balance Successfully.
+        payload:
+          type: array
+          items:
+            type: object
+            properties:
+              overallBalance:
+                type: string
+                example: 9330
+              ticker:
+                type: string
+                example: tapis
+              transferableBalance:
+                type: string
+                example: ""
+    getTapAssetsResponse400:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: There is no Address value.
+        payload:
+          type: object
+          example: null      
