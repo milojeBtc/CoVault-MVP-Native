@@ -370,7 +370,7 @@ multiSigWalletRoute.post("/update-vault", async (req, res) => {
 
 multiSigWalletRoute.post("/sendBtc", async (req, res) => {
   try {
-    const { walletId, destination, amount, paymentAddress, pubKey, vaultType } =
+    const { walletId, destination, amount, paymentAddress, ordinalAddress, vaultType } =
       req.body;
 
     let error = "";
@@ -378,6 +378,7 @@ multiSigWalletRoute.post("/sendBtc", async (req, res) => {
     if (!walletId) error += "There is no walletId value.";
     if (!destination) error += "There is no destination value.";
     if (!amount) error += "There is no amount value.";
+    if (!ordinalAddress) error += "There is no ordinalAddress value.";
     if (!vaultType) error += "There is no vaultType value.";
 
     if (vaultType == VaultType.NativeSegwit) {
@@ -386,7 +387,7 @@ multiSigWalletRoute.post("/sendBtc", async (req, res) => {
         destination,
         amount,
         paymentAddress,
-        pubKey
+        ordinalAddress
       );
 
       return res.status(200).send(result);
@@ -395,7 +396,8 @@ multiSigWalletRoute.post("/sendBtc", async (req, res) => {
         walletId,
         amount,
         destination,
-        paymentAddress
+        paymentAddress,
+        ordinalAddress
       );
       return res.status(200).send(result);
     }
@@ -570,12 +572,13 @@ multiSigWalletRoute.get("/fetchTaprootVaultList", async (req, res) => {
 
 multiSigWalletRoute.post("/sendBtcTaproot", async (req, res) => {
   try {
-    const { id, amount, destinationAddress, paymentAddress } = req.body;
+    const { id, amount, destinationAddress, paymentAddress, ordinalAddress } = req.body;
     const result = await sendBtcTaproot(
       id,
       amount,
       destinationAddress,
-      paymentAddress
+      paymentAddress,
+      ordinalAddress
     );
     return res.status(200).send({
       success: true,
@@ -628,7 +631,7 @@ multiSigWalletRoute.post("/combine", async (req, res) => {
 multiSigWalletRoute.post("/send-ordinals-ns", async (req, res) => {
   console.log("exec in send-ordinals-ns ==>  api is calling!!");
   try {
-    const { vaultId, destination, inscriptionId, paymentAddress } = req.body;
+    const { vaultId, destination, inscriptionId, paymentAddress, ordinalAddress } = req.body;
     let error = "";
 
     if (!vaultId) error += "There is no vaultId value.";
@@ -648,7 +651,8 @@ multiSigWalletRoute.post("/send-ordinals-ns", async (req, res) => {
       vaultId,
       destination,
       inscriptionId,
-      paymentAddress
+      paymentAddress,
+      ordinalAddress
     );
 
     return res.status(200).json({
@@ -669,7 +673,7 @@ multiSigWalletRoute.post("/send-ordinals-ns", async (req, res) => {
 multiSigWalletRoute.post("/send-ordinals-taproot", async (req, res) => {
   console.log("send-ordinals-ns ==>  api is calling!!");
   try {
-    const { vaultId, destination, inscriptionId, paymentAddress } =
+    const { vaultId, destination, inscriptionId, paymentAddress, ordinalAddress } =
       req.body;
     let error = "";
 
@@ -677,6 +681,7 @@ multiSigWalletRoute.post("/send-ordinals-taproot", async (req, res) => {
     if (!destination) error += "There is no destination value.";
     if (!inscriptionId) error += "There is no inscriptionId value.";
     if (!paymentAddress) error += "There is no paymentAddress value.";
+    if (!ordinalAddress) error += "There is no ordinalAddress value.";
 
     if (error != "") {
       return res.status(200).json({
@@ -690,7 +695,8 @@ multiSigWalletRoute.post("/send-ordinals-taproot", async (req, res) => {
       vaultId,
       inscriptionId,
       destination,
-      paymentAddress
+      paymentAddress,
+      ordinalAddress
     );
 
     return res.status(200).json(result);
@@ -714,6 +720,7 @@ multiSigWalletRoute.post("/send-brc20-ns", async (req, res) => {
       ticker,
       amount,
       paymentAddress,
+      ordinalAddress
     } = req.body;
 
     console.log("req.body in send-brc20-ns ==> ", req.body);
@@ -723,6 +730,7 @@ multiSigWalletRoute.post("/send-brc20-ns", async (req, res) => {
     if (!destination) error += "There is no destination value.";
     if (!inscriptionId) error += "There is no inscriptionId value.";
     if (!paymentAddress) error += "There is no paymentAddress value.";
+    if (!ordinalAddress) error += "There is no ordinalAddress value.";
     if (!ticker) error += "There is no vaultId value.";
     if (!amount) error += "There is no destination value.";
 
@@ -740,7 +748,8 @@ multiSigWalletRoute.post("/send-brc20-ns", async (req, res) => {
       destination,
       ticker,
       amount,
-      paymentAddress
+      paymentAddress,
+      ordinalAddress
     );
 
     return res.status(200).json({
@@ -862,7 +871,7 @@ multiSigWalletRoute.post("/checking-brc20-request", async (req, res) => {
 
 multiSigWalletRoute.post("/pre-tap-inscribe", async (req, res) => {
   try {
-    const { paymentAddress, paymentPublicKey, itemList } = req.body;
+    const { paymentAddress, paymentPublicKey, itemList, walletType } = req.body;
 
     console.log("pre-tap-inscribe api is calling.");
 
@@ -870,6 +879,8 @@ multiSigWalletRoute.post("/pre-tap-inscribe", async (req, res) => {
     if (!paymentAddress) error += "There is no paymentAddress value.";
     if (!paymentPublicKey) error += "There is no paymentPublicKey value.";
     if (!itemList) error += "There is no itemList value.";
+    if (!walletType) error += "There is no walletType value.";
+
 
     if (error != "") {
       return res.status(200).json({
@@ -882,7 +893,8 @@ multiSigWalletRoute.post("/pre-tap-inscribe", async (req, res) => {
     const result = await inscribeText(
       paymentAddress,
       paymentPublicKey,
-      itemList
+      itemList,
+      walletType
     );
     return res.status(200).json(result);
   } catch (error) {

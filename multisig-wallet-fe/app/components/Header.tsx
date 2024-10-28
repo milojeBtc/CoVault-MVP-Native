@@ -23,7 +23,8 @@ import {
 import Notiflix from "notiflix";
 import WalletConnectIcon from "./Icon/WalletConnectIcon";
 import WalletContext from "../contexts/WalletContext";
-import { WalletTypes, Account, SIGN_MESSAGE, TEST_MODE } from "../utils/utils";
+import { SIGN_MESSAGE, TEST_MODE } from "../utils/utils";
+import { WalletTypes, Account } from "../utils/_type";
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -37,7 +38,6 @@ import { walletConnect } from "../controller";
 import { IoPieChart } from "react-icons/io5";
 import { FiPlusCircle } from "react-icons/fi";
 import { IoDocumentTextOutline } from "react-icons/io5";
-import { RiShoppingBasketFill } from "react-icons/ri";
 
 import { Loading } from "./Loading";
 

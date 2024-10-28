@@ -7,18 +7,29 @@ import {
   fetchRequestListController,
   updateRequestPsbtController,
 } from "@/app/controller";
-import { IRequest } from "@/app/utils/utils";
+import { base64ToHex, HexToBase64Convertor } from "@/app/utils/commonFunc";
+import { TEST_MODE } from "@/app/utils/utils";
+import { IRequest, WalletTypes } from "@/app/utils/_type";
 import { Psbt } from "bitcoinjs-lib";
 import Notiflix from "notiflix";
 import React, { useContext, useEffect, useState } from "react";
 import { MdOutlineContentCopy } from "react-icons/md";
+import {
+  BitcoinNetworkType,
+  signTransaction,
+  SignTransactionOptions,
+} from "sats-connect";
 import { useClipboard } from "use-clipboard-copy";
 
 export default function Page() {
   const [requestList, setRequestList] = useState<IRequest[]>();
   const [selectedRequest, setSelectedRequest] = useState<IRequest>();
 
-  const { paymentPublicKey } = useContext(WalletContext);
+  const {
+    paymentPublicKey,
+    paymentAddress,
+    walletType,
+  } = useContext(WalletContext);
 
   // CopyHandler
   const clipboard = useClipboard();
@@ -64,44 +75,123 @@ export default function Page() {
     console.log("fetchBSRequestPsbtController ==> ", result);
     const psbt = result.payload;
     console.log("request psbt ==>", psbt);
+    console.log("walletType ==>", walletType);
     if (psbt) {
       try {
-        const tempPsbt = Psbt.fromHex(psbt);
-        const inputCount = tempPsbt.inputCount;
-        const inputArray = Array.from({ length: inputCount }, (_, i) => i);
-        console.log("inputArray ==> ", inputArray);
-        const toSignInputs: {
-          index: number;
-          publicKey: string;
-          disableTweakSigner: boolean;
-        }[] = [];
-        inputArray.map((value: number) =>
-          toSignInputs.push({
-            index: value,
-            publicKey: paymentPublicKey,
-            disableTweakSigner: true,
-          })
-        );
-        console.log("toSignInputs ==> ", toSignInputs);
-        const signedPsbt = await (window as any).unisat.signPsbt(psbt, {
-          autoFinalized: false,
-          toSignInputs,
-        });
-        console.log("signedPsbt ==> ", signedPsbt);
-        const result = await updateRequestPsbtController(
-          signedPsbt,
-          request._id,
-          paymentPublicKey
-        );
-        console.log("after update request result ==> ", result);
-        if (result.success) {
-          Notiflix.Notify.success(result.message);
-          if (result.message == "Transaction broadcasting successfully.") {
-            Notiflix.Notify.success(result.payload);
-          }
-          await fetchRequestList();
-        } else {
-            Notiflix.Notify.failure(result.message);
+        switch (walletType) {
+          case WalletTypes.UNISAT:
+            const tempPsbt = Psbt.fromHex(psbt);
+            const inputCount = tempPsbt.inputCount;
+            const inputArray = Array.from({ length: inputCount }, (_, i) => i);
+            console.log("inputArray ==> ", inputArray);
+            const toSignInputs: {
+              index: number;
+              publicKey: string;
+              disableTweakSigner: boolean;
+            }[] = [];
+            inputArray.map((value: number) =>
+              toSignInputs.push({
+                index: value,
+                publicKey: paymentPublicKey,
+                disableTweakSigner: true,
+              })
+            );
+            console.log("toSignInputs ==> ", toSignInputs);
+            const signedPsbt = await (window as any).unisat.signPsbt(psbt, {
+              autoFinalized: false,
+              toSignInputs,
+            });
+            console.log("signedPsbt ==> ", signedPsbt);
+            const result = await updateRequestPsbtController(
+              signedPsbt,
+              request._id,
+              paymentPublicKey
+            );
+            console.log("after update request result ==> ", result);
+            if (result.success) {
+              Notiflix.Notify.success(result.message);
+              if (result.message == "Transaction broadcasting successfully.") {
+                Notiflix.Notify.success(result.payload);
+              }
+              await fetchRequestList();
+            } else {
+              Notiflix.Notify.failure(result.message);
+            }
+            break;
+          case WalletTypes.XVERSE:
+            let signedPSBTXverse = "";
+            const base64 = HexToBase64Convertor(psbt);
+            console.log("base64 ==> ", base64);
+            const purePsbt = Psbt.fromBase64(base64);
+            console.log("purePsbt ==> ", purePsbt);
+            const inputCountXverse = purePsbt.inputCount;
+            const inputArrayXverse = Array.from(
+              { length: inputCountXverse },
+              (_, i) => i
+            );
+            // console.log("inputArray ==> ", inputArrayXverse);
+            console.log(
+              "purePsbt input ==> ",
+              purePsbt.data.inputs[0].witnessUtxo?.value
+            );
+            const paymentArray = [];
+            const ordinalsArray = [];
+            for (let i = 0; i < inputCountXverse; i++) {
+              if (purePsbt.data.inputs[i].witnessUtxo?.value == 546)
+                ordinalsArray.push(i);
+              else paymentArray.push(i);
+            }
+            console.log("paymentArray ==> ", paymentArray);
+            console.log("ordinalsArray ==> ", ordinalsArray);
+
+            const signPsbtOptions: SignTransactionOptions = {
+              payload: {
+                network: {
+                  type: TEST_MODE
+                    ? BitcoinNetworkType.Testnet
+                    : BitcoinNetworkType.Mainnet,
+                },
+                message: "Sign Transaction",
+                psbtBase64: base64,
+                broadcast: false,
+                inputsToSign: [
+                  {
+                    address: paymentAddress,
+                    signingIndexes: inputArrayXverse,
+                  },
+                ],
+              },
+              onFinish: (response: any) => {
+                console.log(response);
+                signedPSBTXverse = base64ToHex(response.psbtBase64);
+                console.log("signedPSBTXverse ==> ", signedPSBTXverse);
+              },
+              onCancel: () => alert("Canceled"),
+            };
+
+            await signTransaction(signPsbtOptions);
+
+            console.log("signedPSBTXverse ==> ", signedPSBTXverse);
+            const resultXverse = await updateRequestPsbtController(
+              signedPSBTXverse,
+              request._id,
+              paymentPublicKey
+            );
+            console.log("after update request resultXverse ==> ", resultXverse);
+            if (resultXverse.success) {
+              Notiflix.Notify.success(resultXverse.message);
+              if (
+                resultXverse.message == "Transaction broadcasting successfully."
+              ) {
+                Notiflix.Notify.success(resultXverse.payload);
+              }
+              await fetchRequestList();
+            } else {
+              Notiflix.Notify.failure(resultXverse.message);
+            }
+            break;
+          default:
+            break;
         }
       } catch (error) {
         console.log("reject sign on unisat ==> ", error);
@@ -123,7 +213,7 @@ export default function Page() {
   return paymentPublicKey ? (
     <div className="flex flex-col gap-10 mt-20 min-h-[100vh-30px]">
       <p className="w-full text-center text-4xl text-yellow-300">
-        Batch Sending Vault Request
+        Multisig Vault Request
       </p>
       <div className="flex flex-wrap mx-4 items-start justify-between pt-4 gap-4">
         {requestList?.length ? (
@@ -212,7 +302,7 @@ export default function Page() {
           ))
         ) : (
           <div className="w-full text-center mt-40 text-white text-xl pb-20 mb-4">
-            There is no Batch Sending Vault Request
+            There is no Multisig Vault Request
           </div>
         )}
       </div>

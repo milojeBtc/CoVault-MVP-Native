@@ -13,7 +13,7 @@ catch (error) {
     console.error("Error loading environment variables:", error);
     process.exit(1);
 }
-exports.PORT = process.env.PORT || 9040;
+exports.PORT = process.env.PORT || 9000;
 exports.JWT_SECRET = process.env.JWT_SECRET || "JWT_SECRET";
 exports.TEST_MODE = false;
 exports.MONGO_URL = exports.TEST_MODE
@@ -32,7 +32,7 @@ exports.MEMPOOL_URL = exports.TEST_MODE
     ? "https://mempool.space/testnet/api"
     : "https://ordinalgenesis.mempool.space/api";
 exports.TRAC_NETWORK_API = exports.TEST_MODE
-    ? "http://tap.covault.xyz"
+    ? "http://testtap.covault.xyz"
     : "http://tap.covault.xyz";
 exports.ORDINAL_URL = exports.TEST_MODE
     ? "https://static-testnet.unisat.io/content"

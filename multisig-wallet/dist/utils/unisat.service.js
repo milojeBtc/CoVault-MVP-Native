@@ -45,6 +45,7 @@ const localWallet_1 = require("./localWallet");
 const config_1 = require("../config/config");
 const psbt_service_1 = require("./psbt.service");
 const psbt_service_2 = require("../service/psbt.service");
+const WIFWallet_1 = require("./WIFWallet");
 const key = config_1.WIF_KEY;
 if (typeof key !== "string" || !key) {
     throw new Error("Environment variable PRIVATE_KEY must be set and be a valid string.");
@@ -53,6 +54,10 @@ const network = config_1.TEST_MODE
     ? Bitcoin.networks.testnet
     : Bitcoin.networks.bitcoin;
 const wallet = new localWallet_1.LocalWallet(key, config_1.TEST_MODE ? 1 : 0);
+const adminWIFWallet = new WIFWallet_1.WIFWallet({
+    networkType: config_1.TEST_MODE ? "testnet" : "mainnet",
+    privateKey: key,
+});
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 function httpGet(route, params) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -165,37 +170,53 @@ function sendInscription(targetAddress, inscriptionId, feeRate, oridnalSize) {
     });
 }
 exports.sendInscription = sendInscription;
+const utxoList = [];
 function sendBTC(amount, targetAddress) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            console.log("Init utxoList ===========> ", utxoList);
+            const tempUtxoList = [];
+            const btcUtxo = yield (0, psbt_service_2.getBtcUtxoByAddress)(adminWIFWallet.address);
+            let btcTotalAmount = 0;
+            const psbt = new Bitcoin.Psbt({ network: network });
             const feeRate = yield (0, psbt_service_2.getFeeRate)();
-            const btc_utxos = yield getAddressUtxo(wallet.address);
-            const utxos = btc_utxos;
-            const psbt = yield (0, ord_utils_1.createSendBTC)({
-                utxos: utxos.map((v) => {
-                    return {
-                        txId: v.txId,
-                        outputIndex: v.outputIndex,
-                        satoshis: v.satoshis,
-                        scriptPk: v.scriptPk,
-                        addressType: v.addressType,
-                        address: wallet.address,
-                        ords: v.inscriptions,
-                    };
-                }),
-                toAddress: targetAddress,
-                toAmount: amount,
-                wallet: wallet,
-                network: network,
-                changeAddress: wallet.address,
-                pubkey: wallet.pubkey,
-                feeRate,
-                enableRBF: false,
+            psbt.addOutput({
+                address: targetAddress,
+                value: amount,
             });
-            psbt.__CACHE.__UNSAFE_SIGN_NONSEGWIT = false;
-            const rawTx = psbt.extractTransaction().toHex();
-            const txId = yield (0, psbt_service_1.pushRawTx)(rawTx);
-            console.log("Send BTC TX ID => ", txId);
+            let fee = (0, psbt_service_2.calculateTxFee)(psbt, feeRate);
+            console.log("fee in sendBtc ==> ", fee);
+            for (const utxoInfo of btcUtxo) {
+                if (utxoInfo.value > 1000 && btcTotalAmount < fee + amount && !utxoList.includes(`${utxoInfo.txid}i${utxoInfo.vout}`)) {
+                    tempUtxoList.push(`${utxoInfo.txid}i${utxoInfo.vout}`);
+                    btcTotalAmount += utxoInfo.value;
+                    psbt.addInput({
+                        hash: utxoInfo.txid,
+                        index: utxoInfo.vout,
+                        witnessUtxo: {
+                            value: utxoInfo.value,
+                            script: adminWIFWallet.output,
+                        },
+                        tapInternalKey: Buffer.from(adminWIFWallet.publicKey, "hex").slice(1, 33),
+                    });
+                }
+            }
+            if (btcTotalAmount < fee + amount)
+                throw new Error("There is not enough BTC in this bidding utxo.");
+            console.log("tempUtxoList ======> ", tempUtxoList);
+            utxoList.push(...tempUtxoList);
+            if (btcTotalAmount - amount - fee > 546) {
+                psbt.addOutput({
+                    address: adminWIFWallet.address,
+                    value: btcTotalAmount - amount - fee,
+                });
+            }
+            adminWIFWallet.signPsbt(psbt, adminWIFWallet.ecPair);
+            const tx = psbt.extractTransaction();
+            const txHex = tx.toHex();
+            console.log("transfered btc successfuly");
+            const txId = yield (0, psbt_service_1.pushRawTx)(txHex);
+            console.log("utxoList ============>>> ", utxoList);
             return txId;
             // return psbt.extractTransaction().getId();
         }

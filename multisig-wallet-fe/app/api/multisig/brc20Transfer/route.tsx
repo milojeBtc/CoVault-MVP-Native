@@ -11,6 +11,7 @@ export async function POST(request: NextRequest) {
       ticker,
       amount,
       paymentAddress,
+      ordinalAddress,
       vaultType,
     } = await request.json();
     const axios = require("axios");
@@ -39,6 +40,7 @@ export async function POST(request: NextRequest) {
         ticker,
         amount,
         paymentAddress,
+        ordinalAddress,
         vaultType,
       }),
     };

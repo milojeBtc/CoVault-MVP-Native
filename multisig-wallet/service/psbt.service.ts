@@ -159,7 +159,7 @@ export const getFeeRate = async () => {
     return Math.round(res.data.fastestFee * 1.5);
   } catch (error) {
     console.log("Ordinal api is not working now. Try again later");
-    return 40 * 2;
+    return 300;
   }
 };
 

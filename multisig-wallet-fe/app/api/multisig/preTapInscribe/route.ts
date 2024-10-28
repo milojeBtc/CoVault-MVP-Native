@@ -4,7 +4,7 @@ import qs from "qs";
 // Fetch a inscriptions using wallet address
 export async function POST(request: NextRequest) {
   try {
-    const { paymentAddress, paymentPublicKey, itemList } = await request.json();
+    const { paymentAddress, paymentPublicKey, itemList, walletType } = await request.json();
     const axios = require("axios");
 
     console.log(
@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
     console.log("itemList ==> ", itemList);
     console.log("paymentAddress ==> ", paymentAddress);
     console.log("paymentPublicKey ==> ", paymentPublicKey);
+    console.log("walletType ==> ", walletType);
 
     let config = {
       method: "post",
@@ -23,6 +24,7 @@ export async function POST(request: NextRequest) {
         paymentAddress,
         paymentPublicKey,
         itemList,
+        walletType
       }),
     };
 

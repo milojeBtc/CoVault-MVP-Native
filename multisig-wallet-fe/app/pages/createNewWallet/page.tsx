@@ -15,17 +15,16 @@ import { FaMinus, FaPlus, FaVault } from "react-icons/fa6";
 import { IErr, IRuneAssets } from "@/app/utils/_type";
 import { AiOutlineUpload } from "react-icons/ai";
 import WalletContext from "@/app/contexts/WalletContext";
-import { SiVaultwarden } from "react-icons/si";
-import { ImShield } from "react-icons/im";
 import Notiflix from "notiflix";
-import { TEST_MODE, WalletTypes } from "@/app/utils/utils";
-import {
-  createNewAirdropVault,
-  createNewSyndicateVault,
-  createNewVault,
-} from "@/app/controller";
+import { TEST_MODE } from "@/app/utils/utils";
+import { createNewVault, getFeeLevelController, usdToBtcController } from "@/app/controller";
+import { WalletTypes } from "@/app/utils/_type";
+import { DEPLOY_FEE, DEPLOY_FEE_VIP } from "@/app/utils/constant";
+import { FEE_ADDRESS } from "@/app/utils/serverAddress";
+import { useBitcoin } from "@kondor-finance/zky-toolkit";
 
 export default function Page() {
+  const { signMessage, signPsbt, sendTransfer } = useBitcoin();
   const [selected, setSelected] = useState("multi");
   // CreateNewVault
   const [coSignerCount, setCoSignerCount] = useState(0);
@@ -52,13 +51,8 @@ export default function Page() {
     preview: "",
   });
 
-  const {
-    walletType,
-    ordinalAddress,
-    ordinalPublicKey,
-    paymentAddress,
-    paymentPublicKey,
-  } = useContext(WalletContext);
+  const { walletType, ordinalAddress, paymentAddress } =
+    useContext(WalletContext);
 
   const fileInput = useRef<HTMLInputElement>(null);
   const uploadFile = async (evt: any) => {
@@ -120,6 +114,43 @@ export default function Page() {
 
       Notiflix.Loading.hourglass("Uploading images...");
 
+      // Pay the fee for deploy
+      const feeLevel = await getFeeLevelController(ordinalAddress);
+      console.log("feeLevel ==> ", feeLevel);
+      const satsAmount = await usdToBtcController(feeLevel ?  DEPLOY_FEE_VIP : DEPLOY_FEE);
+      console.log("DEPLOY SATS AMOUNT ==> ", satsAmount);
+
+      let payingFeeTxid = "";
+
+      switch (walletType) {
+        case WalletTypes.UNISAT:
+          payingFeeTxid = await (window as any).unisat.sendBitcoin(
+            FEE_ADDRESS,
+            satsAmount
+          );
+          console.log("payingFeeTxid ==> ", payingFeeTxid);
+          break;
+        case WalletTypes.XVERSE:
+          console.log("Paying fee with Xverse wallet.")
+          await sendTransfer(FEE_ADDRESS, (satsAmount / Math.pow(10, 8)).toString())
+            .then((txId) => {
+              payingFeeTxid = txId;
+              console.log("Transaction successful with ID:", txId);
+            })
+            .catch((error) => {
+              console.log("error ==> ", error);
+            });
+        default:
+          break;
+      }
+
+      if(!payingFeeTxid) {
+        Notiflix.Loading.remove();
+        Notiflix.Notify.failure("Paying Fee is failed.");
+        return
+      }
+      // End pay fee
+
       const formData = new FormData();
       formData.append("file", fileInput?.current?.files?.[0]!);
 
@@ -127,203 +158,44 @@ export default function Page() {
         method: "POST",
         body: formData,
       });
-      const result = await response.json();
-      console.log("result ==> ", result);
-      if (!result.success) {
+      const updateResult = await response.json();
+      console.log("updateResult ==> ", updateResult);
+      if (!updateResult.success) {
         Notiflix.Notify.failure("Get error while uploading image.");
         return;
       }
       // return
-      const imageUrl = result.payload;
+      const imageUrl = updateResult.payload;
       // if (thresHold.current) thresHoldValue = thresHold.current["value"];
       if (!coSignerCount) return;
       const thresHoldValue = coSignerCount.toString();
 
       console.log("walletType ==> ", walletType);
 
-      if (walletType == WalletTypes.UNISAT) {
-        Notiflix.Loading.change("Creating New Vault...");
-        const result = await createNewVault(
-          cosignerList,
-          thresHoldValue,
-          assets,
-          imageUrl,
-          typeSelected
-        );
-        console.log("New Vault on submit ==> ", result);
+      // if (walletType == WalletTypes.UNISAT) {
+      Notiflix.Loading.change("Creating New Vault...");
+      const result = await createNewVault(
+        cosignerList,
+        thresHoldValue,
+        assets,
+        imageUrl,
+        typeSelected
+      );
+      console.log("New Vault on submit ==> ", result);
 
-        if (result.success) {
-          Notiflix.Notify.success(result.message);
-          console.log("new address ==> ", result.payload.vault.payload.address);
-          setNewVault(result.payload.vault.payload.address);
-        } else Notiflix.Notify.failure(result.message);
+      if (result.success) {
+        Notiflix.Notify.success(result.message);
+        console.log("new address ==> ", result.payload.vault.payload.address);
+        setNewVault(result.payload.vault.payload.address);
+      } else Notiflix.Notify.failure(result.message);
 
-        console.log("vault ==> ", result.vault.payload);
-        console.log("rune ==> ", result.rune.payload);
+      console.log("vault ==> ", result.vault.payload);
+      console.log("rune ==> ", result.rune.payload);
 
-        Notiflix.Loading.remove();
-      }
-    } catch (error) {
-      console.log("submit ==> ", error);
       Notiflix.Loading.remove();
-    }
-  };
+      // } else {
 
-  const onCreateNewAirdropWallet = async () => {
-    try {
-      let cosignerList = [paymentPublicKey];
-      let thresHoldValue = "1";
-      const assets: IRuneAssets = {
-        runeName: "None",
-        runeAmount: "None",
-        initialPrice: "None",
-        runeSymbol: "None",
-        creatorAddress: ordinalAddress,
-      };
-
-      if (!fileInput?.current?.files?.[0]!) {
-        Notiflix.Notify.failure("The banner image is required.");
-        return;
-      }
-
-      if (runeNameRef.current) assets.runeName = runeNameRef.current["value"];
-      if (runeAmountRef.current)
-        assets.runeAmount = runeAmountRef.current["value"];
-      if (runePriceRef.current)
-        assets.initialPrice = runePriceRef.current["value"];
-      if (runeSymbolRef.current)
-        assets.runeSymbol = runeSymbolRef.current["value"];
-
-      const formData = new FormData();
-      formData.append("file", fileInput?.current?.files?.[0]!);
-
-      Notiflix.Loading.hourglass("Uploading Images...");
-
-      const response = await fetch("/api/uploadImage", {
-        method: "POST",
-        body: formData,
-      });
-      const result = await response.json();
-      console.log("result ==> ", result);
-      if (!result.success) {
-        Notiflix.Notify.failure("Get error while uploading image...");
-        return;
-      }
-      // return
-      const imageUrl = result.payload;
-      console.log("imageUrl ==> ", imageUrl);
-
-      if (walletType == WalletTypes.UNISAT) {
-        Notiflix.Loading.change("Creating New Airdrop Vault...");
-        const result = await createNewAirdropVault(
-          cosignerList,
-          thresHoldValue,
-          {
-            paymentAddress,
-            paymentPublicKey,
-            ordinalAddress,
-            ordinalPublicKey,
-          },
-          assets,
-          imageUrl
-        );
-        console.log("New Vault on submit ==> ", result);
-
-        if (result.success) {
-          Notiflix.Notify.success(result.message);
-          Notiflix.Loading.remove();
-          console.log("new address ==> ", result.payload.vault.payload.address);
-          setNewVault(result.payload.vault.payload.address);
-        } else Notiflix.Notify.failure(result.message);
-
-        Notiflix.Loading.remove();
-        console.log("vault ==> ", result.payload.vault.payload);
-        console.log("rune ==> ", result.payload.rune.payload);
-      }
-    } catch (error) {
-      Notiflix.Loading.remove();
-      console.log("submit ==> ", error);
-    }
-  };
-
-  const onCreateNewSyndicateVault = async () => {
-    try {
-      let cosignerList = [];
-      // let thresHoldValue = "";
-      const assets: IRuneAssets = {
-        runeName: "None",
-        runeAmount: "None",
-        initialPrice: "None",
-        runeSymbol: "None",
-        creatorAddress: ordinalAddress,
-      };
-
-      if (!fileInput?.current?.files?.[0]!) {
-        Notiflix.Notify.failure("The banner image is required.");
-        return;
-      }
-
-      if (runeNameRef.current) assets.runeName = runeNameRef.current["value"];
-      if (runeAmountRef.current)
-        assets.runeAmount = runeAmountRef.current["value"];
-      if (runePriceRef.current)
-        assets.initialPrice = runePriceRef.current["value"];
-      if (runeSymbolRef.current)
-        assets.runeSymbol = runeSymbolRef.current["value"];
-
-      if (coSignerRef.current)
-        cosignerList = (coSignerRef.current["value"] as any).split("\n");
-
-      Notiflix.Loading.hourglass("Uploading Images...");
-
-      const formData = new FormData();
-      formData.append("file", fileInput?.current?.files?.[0]!);
-
-      const response = await fetch("/api/uploadImage", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await response.json();
-      console.log("result ==> ", result);
-      if (!result.success) {
-        Notiflix.Notify.failure("Get error while uploading image.");
-        return;
-      }
-      // return
-      const imageUrl = result.payload;
-      // if (thresHold.current) thresHoldValue = thresHold.current["value"];
-      if (!coSignerCount) return;
-      const thresHoldValue = coSignerCount.toString();
-
-      Notiflix.Loading.hourglass("Creating New Syndicate Vault...");
-
-      if (walletType == WalletTypes.UNISAT) {
-        const result = await createNewSyndicateVault(
-          cosignerList,
-          thresHoldValue,
-          {
-            paymentAddress,
-            paymentPublicKey,
-            ordinalAddress,
-            ordinalPublicKey,
-          },
-          assets,
-          imageUrl
-        );
-        console.log("New Vault on submit ==> ", result);
-
-        if (result.success) {
-          Notiflix.Notify.success(result.message);
-          console.log("new address ==> ", result.payload.vault.payload.address);
-          setNewVault(result.payload.vault.payload.address);
-        } else Notiflix.Notify.failure(result.message);
-
-        console.log("vault ==> ", result.payload.vault.payload);
-        console.log("rune ==> ", result.payload.rune.payload);
-        Notiflix.Loading.remove();
-        // }
-      }
+      // }
     } catch (error) {
       console.log("submit ==> ", error);
       Notiflix.Loading.remove();
@@ -331,7 +203,7 @@ export default function Page() {
   };
 
   // End
-  return ordinalAddress ? (
+  return paymentAddress ? (
     <div className="flex flex-col w-full mt-20">
       <div className="max-w-full min-[640px]:w-[644px] max-[640px]:w-[594px] py-[2px] bg-gradient-to-br from-[#6D757F] via-[#28292C] to-[#28292C] mx-auto rounded-xl">
         <Card className="max-w-full min-[640px]:w-[640px] max-[640px]:w-[590px] mx-auto bg-[#1C1D1F] p-3">
@@ -558,7 +430,11 @@ export default function Page() {
                       </button>
                       {transactionID ? (
                         <a
-                          href={TEST_MODE ? `https://mempool.space/testnet/tx/${transactionID}` : `https://mempool.space/tx/${transactionID}`}
+                          href={
+                            TEST_MODE
+                              ? `https://mempool.space/testnet/tx/${transactionID}`
+                              : `https://mempool.space/tx/${transactionID}`
+                          }
                         />
                       ) : (
                         <></>

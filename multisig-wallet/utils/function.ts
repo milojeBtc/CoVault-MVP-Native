@@ -2,6 +2,8 @@ import axios from "axios";
 import { IUtxo, IUtxoBalance, TokenTypes } from "./types";
 
 import {
+  CURRENT_BITCOIN_PRICE_URL,
+  DAO_RUNE_TICKER_ID,
   OPENAPI_UNISAT_TOKEN,
   OPENAPI_UNISAT_URL,
   TEST_MODE,
@@ -187,7 +189,9 @@ export const checkingAssets = async (
   //     else return false
 
   // } else if(tokenType == TokenTypes.Rune) {
-  const url = TEST_MODE ? `https://open-api-testnet.unisat.io/v1/indexer/address/${ordinalAddress}/runes/${tokenName}/balance` : `https://open-api.unisat.io/v1/indexer/address/${ordinalAddress}/runes/${tokenName}/balance`;
+  const url = TEST_MODE
+    ? `https://open-api-testnet.unisat.io/v1/indexer/address/${ordinalAddress}/runes/${tokenName}/balance`
+    : `https://open-api.unisat.io/v1/indexer/address/${ordinalAddress}/runes/${tokenName}/balance`;
   const payload = await axios.get(url, config);
   const privileage = payload.data.data.amount;
 
@@ -213,23 +217,32 @@ export const getInscriptionData = async (
       (inscription: any) => inscription.inscriptionId === inscriptionId
     );
 
-    if(!filterInscription) {
-      console.log("First Attempt get failed, Try second attempt. ==> ", filterInscription);
-      await delay(30000)
+    if (!filterInscription) {
+      console.log(
+        "First Attempt get failed, Try second attempt. ==> ",
+        filterInscription
+      );
+      await delay(30000);
       const res2 = await axios.get(url, { ...config });
       const filterInscription2 = res2.data.data.inscription.find(
         (inscription: any) => inscription.inscriptionId === inscriptionId
       );
-      if(!filterInscription2) {
-        console.log("Second Attempt get failed, Try third attempt. ==>", filterInscription2);
-        await delay(30000)
+      if (!filterInscription2) {
+        console.log(
+          "Second Attempt get failed, Try third attempt. ==>",
+          filterInscription2
+        );
+        await delay(30000);
         const res3 = await axios.get(url, { ...config });
         const filterInscriptio3 = res3.data.data.inscription.find(
           (inscription: any) => inscription.inscriptionId === inscriptionId
         );
-        if(!filterInscriptio3) {
-          console.log("Third Attempt get failed, Try fourth attempt. ==>", filterInscriptio3);
-          await delay(40000)
+        if (!filterInscriptio3) {
+          console.log(
+            "Third Attempt get failed, Try fourth attempt. ==>",
+            filterInscriptio3
+          );
+          await delay(40000);
           const res4 = await axios.get(url, { ...config });
           const filterInscriptio4 = res4.data.data.inscription.find(
             (inscription: any) => inscription.inscriptionId === inscriptionId
@@ -247,3 +260,50 @@ export const getInscriptionData = async (
     throw new Error("Can not fetch Inscriptions!!");
   }
 };
+
+export const usdToSats = async (amount: number) => {
+  let config = {
+    method: "get",
+    url: `${CURRENT_BITCOIN_PRICE_URL}`,
+    headers: { "Content-Type": "appliation/x-www-form-urlencoded" },
+  };
+
+  console.log("get current btc price ==> ", config);
+  const response = await axios.request(config);
+  const btcPrice = response.data.bpi.USD.rate_float;
+  console.log("Success in get current btc price ==> ", btcPrice);
+
+  const usdToBtcPrice = Math.ceil((amount * Math.pow(10, 8)) / btcPrice);
+  console.log("usdToBtcPrice ==> ", usdToBtcPrice);
+
+  return usdToBtcPrice
+};
+
+export const getFeeLevel = async (address: string) => {
+  try {
+    const url = `${OPENAPI_UNISAT_URL}/v1/indexer/address/${address}/runes/${DAO_RUNE_TICKER_ID}/balance`;
+    console.log("url ==> ", url);
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${OPENAPI_UNISAT_TOKEN}`,
+      },
+    };
+    const payload = (await axios.get(url, config)).data;
+    const code = payload.code;
+    const data = payload.data;
+
+    console.log("code ==> ", code);
+    console.log("data ==> ", data);
+
+    if (code || !data) return false;
+
+    return true; 
+  
+  } catch (error) {
+    console.log("getFeeLevel error ==> ", error);
+    return false
+  }
+}
+
+

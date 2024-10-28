@@ -8,7 +8,8 @@ import { useClipboard } from "use-clipboard-copy";
 import WalletContext from "@/app/contexts/WalletContext";
 import { fetchVaultController, updateVault } from "@/app/controller";
 import { IErr } from "@/app/utils/_type";
-import { IWalletList, TEST_MODE, WalletTypes } from "@/app/utils/utils";
+import { TEST_MODE } from "@/app/utils/utils";
+import { IWalletList, WalletTypes } from "@/app/utils/_type";
 import { AiOutlineUpload } from "react-icons/ai";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 import { MdOutlineContentCopy } from "react-icons/md";
@@ -24,16 +25,10 @@ export default function Page() {
   const {
     walletType,
     ordinalAddress,
-    ordinalPublicKey,
     paymentAddress,
     paymentPublicKey,
     pageIndex,
     setPageIndex,
-    setWalletType,
-    setOrdinalAddress,
-    setPaymentAddress,
-    setPaymentPublicKey,
-    setOrdinalPublicKey,
   } = useContext(WalletContext);
 
   const coSignerRef = useRef(null);
@@ -41,7 +36,7 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [walletList, setWalletList] = useState<IWalletList[]>();
   const [taprootWalletList, setTaprootWalletList] = useState<IWalletList[]>();
-  const isConnected = Boolean(ordinalAddress);
+  const isConnected = Boolean(paymentAddress);
   const [selectedVault, setSelectedVault] = useState<IWalletList>();
 
   const [err, setErr] = useState<IErr>();
@@ -195,7 +190,7 @@ export default function Page() {
         <div className="flex flex-wrap mx-4 items-start justify-around pt-4 gap-4">
           {walletList?.length ? (
             walletList.map((wallet: IWalletList, index: number) =>
-              wallet.cosigner.includes(ordinalPublicKey) ? (
+              wallet.cosigner.includes(paymentPublicKey) ? (
                 <div
                   className="flex flex-col gap-3 w-[450px] px-6 rounded-3xl border-2 border-[#2C2C2C] bg-[#1C1D1F] p-4 text-white"
                   key={index + "wallet"}
@@ -268,7 +263,7 @@ export default function Page() {
               )
             )
           ) : (
-            <div className="text-white"></div>
+            <div className="text-white">There is no NS Vault...</div>
           )}
         </div>
 
@@ -278,7 +273,7 @@ export default function Page() {
         <div className="flex flex-wrap mx-4 items-start justify-around pt-4 gap-4">
           {taprootWalletList?.length ? (
             taprootWalletList.map((wallet: IWalletList, index: number) =>
-              wallet.cosigner.includes(ordinalPublicKey) ? (
+              wallet.cosigner.includes(paymentPublicKey) ? (
                 <div
                   className="flex flex-col gap-3 w-[450px] px-6 rounded-3xl border-2 border-[#2C2C2C] bg-[#1C1D1F] p-4 text-white"
                   key={index + "taprootWalletList"}

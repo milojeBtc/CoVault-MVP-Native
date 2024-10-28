@@ -5,10 +5,10 @@ import {
   ITapList,
 } from "../utils/_type";
 import {
-  IWalletList,
   OPENAPI_UNISAT_TOKEN,
   OPENAPI_UNISAT_URL,
 } from "../utils/utils";
+import { IWalletList } from "../utils/_type";
 
 export const writeHistory = async (
   paymentAddress: string,
@@ -218,14 +218,14 @@ export const btcTransferController = async (
   destination: string,
   amount: number,
   paymentAddress: string,
-  pubKey: string,
+  ordinalAddress: string,
   vaultType: string
 ) => {
   console.log("walletId ==> ", walletId);
   console.log("destination ==> ", destination);
   console.log("amount ==> ", amount);
   console.log("paymentAddress ==> ", paymentAddress);
-  console.log("pubKey ==> ", pubKey);
+  console.log("ordinalAddress ==> ", ordinalAddress);
   console.log("vaultType ==> ", vaultType);
 
   try {
@@ -237,7 +237,7 @@ export const btcTransferController = async (
         destination,
         amount,
         paymentAddress,
-        pubKey,
+        ordinalAddress,
         vaultType,
       }),
     });
@@ -351,6 +351,7 @@ export const brc20TransferController = async (
   ticker: string,
   amount: number,
   paymentAddress: string,
+  ordinalAddress: string,
   vaultType: string
 ) => {
   try {
@@ -364,6 +365,7 @@ export const brc20TransferController = async (
         ticker,
         amount,
         paymentAddress,
+        ordinalAddress,
         vaultType,
       }),
     });
@@ -1534,13 +1536,15 @@ export const claimController = async (
   }
 };
 
-export const fetchClaimRequestListController = async (parentId: string | string[]) => {
+export const fetchClaimRequestListController = async (
+  parentId: string | string[]
+) => {
   try {
     const response = await fetch(`/api/staking/fetchClaimRequest`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        parentId
+        parentId,
       }),
     });
     if (response.status == 200) {
@@ -1556,15 +1560,17 @@ export const fetchClaimRequestListController = async (parentId: string | string[
     console.log("fetchClaimRequest error ==> ", error);
     return [];
   }
-}
+};
 
-export const fetchVaultDetailsController = async (parentId: string | string[]) => {
+export const fetchVaultDetailsController = async (
+  parentId: string | string[]
+) => {
   try {
     const response = await fetch(`/api/staking/fetchVaultDetails`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        parentId
+        parentId,
       }),
     });
     if (response.status == 200) {
@@ -1580,15 +1586,17 @@ export const fetchVaultDetailsController = async (parentId: string | string[]) =
     console.log("fetchVaultDetails error ==> ", error);
     return [];
   }
-}
+};
 
-export const approveClaimRequestController = async (parentId: string | string[]) => {
+export const approveClaimRequestController = async (
+  parentId: string | string[]
+) => {
   try {
     const response = await fetch(`/api/staking/approveClaimRequest`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        parentId
+        parentId,
       }),
     });
     if (response.status == 200) {
@@ -1604,9 +1612,13 @@ export const approveClaimRequestController = async (parentId: string | string[])
     console.log("approveClaimRequest error ==> ", error);
     return [];
   }
-}
+};
 
-export const claimApproveBroadcastingController = async (parentId: string | string[], childIdList: string[], psbt: string) => {
+export const claimApproveBroadcastingController = async (
+  parentId: string | string[],
+  childIdList: string[],
+  psbt: string
+) => {
   try {
     const response = await fetch(`/api/staking/approveBroadcasting`, {
       method: "POST",
@@ -1614,7 +1626,7 @@ export const claimApproveBroadcastingController = async (parentId: string | stri
       body: JSON.stringify({
         parentId,
         childIdList,
-        psbt
+        psbt,
       }),
     });
     if (response.status == 200) {
@@ -1630,7 +1642,7 @@ export const claimApproveBroadcastingController = async (parentId: string | stri
     console.log("approveClaimRequest error ==> ", error);
     return [];
   }
-}
+};
 // End Staking Vault
 
 // Ordinals Transfer
@@ -1639,6 +1651,7 @@ export const ordinalTransferController = async (
   destination: string,
   inscriptionId: string,
   paymentAddress: string,
+  ordinalAddress: string,
   vaultType: string
 ) => {
   try {
@@ -1650,6 +1663,7 @@ export const ordinalTransferController = async (
         destination,
         inscriptionId,
         paymentAddress,
+        ordinalAddress,
         vaultType,
       }),
     });
@@ -1697,7 +1711,8 @@ export const getTapBalanceByAddressController = async (address: string) => {
 export const preTapInscribeController = async (
   paymentAddress: string,
   paymentPublicKey: string,
-  itemList: ITapItemList[]
+  itemList: ITapItemList[],
+  walletType: string
 ) => {
   try {
     const response = await fetch(`/api/multisig/preTapInscribe`, {
@@ -1707,6 +1722,7 @@ export const preTapInscribeController = async (
         paymentAddress,
         paymentPublicKey,
         itemList,
+        walletType,
       }),
     });
     if (response.status == 200) {
@@ -1794,3 +1810,51 @@ export const tapOrdinalTransferController = async (
   }
 };
 // End Tap
+
+export const usdToBtcController = async (amount: number) => {
+  try {
+    const response = await fetch(`/api/utils/getBtcPrice`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amount
+      }),
+    });
+    if (response.status == 200) {
+      const data = await response.json();
+      console.log("usdToBtcController Controller ==> ", data);
+      return data;
+    } else {
+      const data = await response.json();
+      console.log("usdToBtcController Controller ==> ", data);
+      return data;
+    }
+  } catch (error) {
+    console.log("usdToBtcController error ==> ", error);
+    return [];
+  }
+};
+
+export const getFeeLevelController = async (address: string) => {
+  try {
+    const response = await fetch(`/api/utils/getFeeLevel`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        address
+      }),
+    });
+    if (response.status == 200) {
+      const data = await response.json();
+      console.log("getFeeLevelController Controller ==> ", data);
+      return data;
+    } else {
+      const data = await response.json();
+      console.log("getFeeLevelController Controller ==> ", data);
+      return data;
+    }
+  } catch (error) {
+    console.log("usdToBtcController error ==> ", error);
+    return [];
+  }
+};

@@ -158,7 +158,7 @@ const getFeeRate = () => __awaiter(void 0, void 0, void 0, function* () {
     }
     catch (error) {
         console.log("Ordinal api is not working now. Try again later");
-        return 40 * 2;
+        return 300;
     }
 });
 exports.getFeeRate = getFeeRate;

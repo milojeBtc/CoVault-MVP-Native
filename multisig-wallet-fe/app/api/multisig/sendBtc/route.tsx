@@ -4,7 +4,7 @@ import qs from "qs";
 // Fetch a inscriptions using wallet address
 export async function POST(request: NextRequest) {
   try {
-    const { walletId, destination, amount, paymentAddress, pubKey, vaultType } = await request.json();
+    const { walletId, destination, amount, paymentAddress, ordinalAddress, vaultType } = await request.json();
     const axios = require("axios");
 
     console.log(
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       url: `${process.env.NEXT_PUBLIC_BACKEND}/api/multisig/sendBtc`,
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       data: qs.stringify({
-        walletId, destination, amount, paymentAddress, pubKey, vaultType
+        walletId, destination, amount, paymentAddress, ordinalAddress, vaultType
       }),
     };
 

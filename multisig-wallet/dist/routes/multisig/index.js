@@ -675,7 +675,7 @@ multiSigWalletRoute.post("/checking-brc20-request", (req, res) => __awaiter(void
 // Tap protocol
 multiSigWalletRoute.post("/pre-tap-inscribe", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { paymentAddress, paymentPublicKey, itemList } = req.body;
+        const { paymentAddress, paymentPublicKey, itemList, walletType } = req.body;
         console.log("pre-tap-inscribe api is calling.");
         let error = "";
         if (!paymentAddress)
@@ -684,6 +684,8 @@ multiSigWalletRoute.post("/pre-tap-inscribe", (req, res) => __awaiter(void 0, vo
             error += "There is no paymentPublicKey value.";
         if (!itemList)
             error += "There is no itemList value.";
+        if (!walletType)
+            error += "There is no walletType value.";
         if (error != "") {
             return res.status(200).json({
                 success: false,
@@ -691,7 +693,7 @@ multiSigWalletRoute.post("/pre-tap-inscribe", (req, res) => __awaiter(void 0, vo
                 payload: null,
             });
         }
-        const result = yield (0, nativeMusig_controller_1.inscribeText)(paymentAddress, paymentPublicKey, itemList);
+        const result = yield (0, nativeMusig_controller_1.inscribeText)(paymentAddress, paymentPublicKey, itemList, walletType);
         return res.status(200).json(result);
     }
     catch (error) {

@@ -43,8 +43,18 @@ import {
 import Select from "react-dropdown-select";
 import { validate, Network } from "bitcoin-address-validation";
 import { ORDINAL_URL, TEST_MODE } from "@/app/utils/utils";
+import { WalletTypes } from "@/app/utils/_type";
 
 import WalletContext from "@/app/contexts/WalletContext";
+import { HexToBase64Convertor } from "@/app/utils/commonFunc";
+import { Psbt } from "bitcoinjs-lib";
+import {
+  request,
+  BitcoinNetworkType,
+  signTransaction,
+  SignTransactionOptions,
+  RpcErrorCode,
+} from "sats-connect";
 
 export default function Page() {
   const { slug } = useParams();
@@ -156,14 +166,14 @@ export default function Page() {
       const vaultType = prefix == "1p" ? "Taproot" : "NativeSegwit";
 
       // setLoading(true);
-      Notiflix.Loading.hourglass("Generating BTC PSBT...")
+      Notiflix.Loading.hourglass("Generating BTC PSBT...");
 
       const result = await btcTransferController(
         multisigVaultData?._id,
         destination,
         amount,
         paymentAddress,
-        paymentPublicKey,
+        ordinalAddress,
         vaultType
       );
       console.log("result ==> ", result);
@@ -223,13 +233,14 @@ export default function Page() {
       const vaultType = prefix == "1p" ? "Taproot" : "NativeSegwit";
 
       // setLoading(true);
-      Notiflix.Loading.hourglass("Generating Ordinals PSBT...")
+      Notiflix.Loading.hourglass("Generating Ordinals PSBT...");
 
       const result = await ordinalTransferController(
         multisigVaultData?._id,
         destination,
         sendInscribe,
         paymentAddress,
+        ordinalAddress,
         vaultType
       );
       console.log("result ==> ", result);
@@ -243,7 +254,7 @@ export default function Page() {
           "The Request for sending Ordinals is made successfully."
         );
         router.push("/pages/request");
-        setPageIndex(3)
+        setPageIndex(3);
       } else Notiflix.Notify.failure("Get failure in building Request.");
     } catch (error) {
       Notiflix.Loading.remove();
@@ -293,7 +304,7 @@ export default function Page() {
       const vaultType = prefix == "1p" ? "Taproot" : "NativeSegwit";
 
       // setLoading(true);
-      Notiflix.Loading.hourglass("Generating PSBT for rune transfer...")
+      Notiflix.Loading.hourglass("Generating PSBT for rune transfer...");
 
       const result = await runeTransferController(
         multisigVaultData?._id,
@@ -315,7 +326,7 @@ export default function Page() {
           "The Request for sending Rune is made successfully."
         );
         router.push("/pages/request");
-        setPageIndex(3)
+        setPageIndex(3);
       } else Notiflix.Notify.failure("Get failure in building Request.");
     } catch (error) {
       Notiflix.Loading.remove();
@@ -397,18 +408,68 @@ export default function Page() {
         const inscribeAmount = inscribeResult.payload.data.amount;
         const payAddress = inscribeResult.payload.data.payAddress;
 
-        const payResult = await (window as any).unisat.sendBitcoin(
-          payAddress,
-          inscribeAmount
-        );
-        console.log("payResult ==> ", payResult);
+        console.log("walletType ==> ", walletType);
 
-        inscribeId = await getTransferableInscription(
-          multisigVaultData.address,
-          brc20List[batchIndex].ticker,
-          amount
-        );
-        console.log("inscribeId ==> ", inscribeId);
+        switch (walletType) {
+          case WalletTypes.UNISAT:
+            const payResult = await (window as any).unisat.sendBitcoin(
+              payAddress,
+              inscribeAmount
+            );
+            console.log("payResult ==> ", payResult);
+
+            inscribeId = await getTransferableInscription(
+              multisigVaultData.address,
+              brc20List[batchIndex].ticker,
+              amount
+            );
+            console.log("inscribeId ==> ", inscribeId);
+            break;
+          case WalletTypes.XVERSE:
+            // sendTransfer(payAddress, inscribeAmount)
+            //   .then(async (txId) => {
+            //     console.log("Transaction ID:", txId);
+
+            //     inscribeId = await getTransferableInscription(
+
+            //       multisigVaultData.address,
+            //       brc20List[batchIndex].ticker,
+            //       amount
+            //     );
+            //     console.log("inscribeId ==> ", inscribeId);
+            //   })
+            //   .catch((error) => {
+            //     console.error("Error sending transfer:", error);
+            //   });
+
+            const response = await request("sendTransfer", {
+              recipients: [
+                {
+                  address: payAddress,
+                  amount: Number(inscribeAmount),
+                },
+              ],
+            });
+            console.log("response in xverse ==> ", response);
+            if (response.status === "success") {
+              inscribeId = await getTransferableInscription(
+                multisigVaultData.address,
+                brc20List[batchIndex].ticker,
+                amount
+              );
+              console.log("inscribeId ==> ", inscribeId);
+            } else {
+              if (response.error.code === RpcErrorCode.USER_REJECTION) {
+                // handle user cancellation error
+                Notiflix.Notify.warning("You reject the signing.");
+              } else {
+                // handle error
+                console.log("xverse signing error ==> ");
+              }
+            }
+          default:
+            break;
+        }
       }
 
       const result = await brc20TransferController(
@@ -418,6 +479,7 @@ export default function Page() {
         brc20List[batchIndex].ticker,
         amount,
         paymentAddress,
+        ordinalAddress,
         vaultType
       );
       console.log("result ==> ", result);
@@ -432,7 +494,7 @@ export default function Page() {
           "The Request for sending Ordinals is made successfully."
         );
         router.push("/pages/request");
-        setPageIndex(3)
+        setPageIndex(3);
       } else Notiflix.Notify.failure(result.message);
     } catch (error) {
       Notiflix.Loading.remove();
@@ -460,7 +522,8 @@ export default function Page() {
       const preTapInscribe = await preTapInscribeController(
         paymentAddress,
         paymentPublicKey,
-        itemList
+        itemList,
+        walletType
       );
       if (!preTapInscribe.success) {
         Notiflix.Loading.remove();
@@ -469,9 +532,72 @@ export default function Page() {
       }
       console.log("preTapInscribe ==> ", preTapInscribe);
 
-      const signedHexedPsbt = await (window as any).unisat.signPsbt(
-        preTapInscribe.payload.psbt
-      );
+      let signedHexedPsbt;
+      switch (walletType) {
+        case WalletTypes.UNISAT:
+          signedHexedPsbt = await (window as any).unisat.signPsbt(
+            preTapInscribe.payload.psbt
+          );
+          break;
+        case WalletTypes.XVERSE:
+          const base64 = HexToBase64Convertor(preTapInscribe.payload.psbt);
+          console.log("base64 ==> ", base64);
+          const purePsbt = Psbt.fromBase64(base64);
+          console.log("purePsbt ==> ", purePsbt);
+          const inputCountXverse = purePsbt.inputCount;
+          const inputArrayXverse = Array.from(
+            { length: inputCountXverse },
+            (_, i) => i
+          );
+          // console.log("inputArray ==> ", inputArrayXverse);
+          console.log(
+            "purePsbt input ==> ",
+            purePsbt.data.inputs[0].witnessUtxo?.value
+          );
+          const paymentArray = [];
+          const ordinalsArray = [];
+          for (let i = 0; i < inputCountXverse; i++) {
+            if (purePsbt.data.inputs[i].witnessUtxo?.value == 546)
+              ordinalsArray.push(i);
+            else paymentArray.push(i);
+          }
+          console.log("paymentArray ==> ", paymentArray);
+          console.log("ordinalsArray ==> ", ordinalsArray);
+
+          const signPsbtOptions: SignTransactionOptions = {
+            payload: {
+              network: {
+                type: TEST_MODE
+                  ? BitcoinNetworkType.Testnet
+                  : BitcoinNetworkType.Mainnet,
+              },
+              message: "Sign Transaction",
+              psbtBase64: base64,
+              broadcast: false,
+              inputsToSign: [
+                {
+                  address: paymentAddress,
+                  signingIndexes: inputArrayXverse,
+                },
+              ],
+            },
+            onFinish: (response: any) => {
+              console.log(response);
+              const tempPsbt = Psbt.fromBase64(response.psbtBase64);
+              signedHexedPsbt = tempPsbt.finalizeAllInputs().toHex();
+              // signedHexedPsbt = base64ToHex(response.psbtBase64);
+              console.log("signedHexedPsbt ==> ", signedHexedPsbt);
+            },
+            onCancel: () => alert("Canceled"),
+          };
+
+          await signTransaction(signPsbtOptions);
+        default:
+          break;
+      }
+      // signedHexedPsbt = await (window as any).unisat.signPsbt(
+      //   preTapInscribe.payload.psbt
+      // );
       Notiflix.Loading.change("Inscribing tap assets. step 2");
       const tapInscribe = await tapInscribeController(
         multisigVaultData.address,
@@ -506,7 +632,7 @@ export default function Page() {
         return;
       }
       router.push("/pages/request");
-      setPageIndex(3)
+      setPageIndex(3);
       Notiflix.Loading.remove();
       Notiflix.Notify.success(result.message);
     } catch (error) {
@@ -666,7 +792,7 @@ export default function Page() {
         Notiflix.Loading.remove();
         Notiflix.Notify.failure("Invalid Multisig ID.");
         router.push("/pages/multisig");
-        setPageIndex(3)
+        setPageIndex(3);
         return;
       }
       setMultisigVaultData(result.payload);
@@ -747,9 +873,13 @@ export default function Page() {
               <div className="flex flex-row justify-between  border-b border-b-gray-600 pb-2">
                 <p className="text-white">Cosigner: </p>
                 <div className="flex flex-col gap-2 text-white w-1/2">
-                  {multisigVaultData.cosigner.map((cosigner: string, index: number) => (
-                    <p className="truncate" key={"multisigVaultData"+index}>{cosigner}</p>
-                  ))}
+                  {multisigVaultData.cosigner.map(
+                    (cosigner: string, index: number) => (
+                      <p className="truncate" key={"multisigVaultData" + index}>
+                        {cosigner}
+                      </p>
+                    )
+                  )}
                 </div>
               </div>
               <div className="flex flex-row justify-between border-b border-b-gray-600 pb-2">
@@ -793,7 +923,10 @@ export default function Page() {
                 </div>
                 <div className="text-white px-6">
                   {runeBalanceList?.map((rune: IRuneDetail, index: number) => (
-                    <div className="flex flex-row justify-between text-white" key={"runeBalanceList"+index}>
+                    <div
+                      className="flex flex-row justify-between text-white"
+                      key={"runeBalanceList" + index}
+                    >
                       <p className="">{rune.spacedRune}:</p>
                       <p className="ml-auto">
                         {rune.amount}
@@ -817,7 +950,10 @@ export default function Page() {
                 <div className="text-white px-6">
                   {tapList?.length ? (
                     tapList?.map((tap: ITapList, index: number) => (
-                      <div className="flex flex-row justify-between text-white" key={"tapList"+ index}>
+                      <div
+                        className="flex flex-row justify-between text-white"
+                        key={"tapList" + index}
+                      >
                         <p className="">{tap.ticker.toUpperCase()}:</p>
                         <p className="ml-auto">{tap.overallBalance}</p>
                       </div>
@@ -838,18 +974,23 @@ export default function Page() {
                   )}
                 </div>
                 <div className="flex flex-wrap justify-around text-white px-6">
-                  {ordinalsList?.map((ordinals: IOrdinalsList, index: number) => (
-                    <div className="flex flex-col justify-around text-white w-20 border border-white" key={"ordinalsList"+index}>
-                      <img
-                        alt="Inscription Image"
-                        className="w-20 h-20"
-                        src={`${ORDINAL_URL}/${ordinals.inscriptionId}`}
-                      />
-                      <div className="text-black text-center bg-white text-[16] truncate">
-                        {ordinals.inscriptionNumber}
+                  {ordinalsList?.map(
+                    (ordinals: IOrdinalsList, index: number) => (
+                      <div
+                        className="flex flex-col justify-around text-white w-20 border border-white"
+                        key={"ordinalsList" + index}
+                      >
+                        <img
+                          alt="Inscription Image"
+                          className="w-20 h-20"
+                          src={`${ORDINAL_URL}/${ordinals.inscriptionId}`}
+                        />
+                        <div className="text-black text-center bg-white text-[16] truncate">
+                          {ordinals.inscriptionNumber}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               </div>
 
@@ -864,7 +1005,10 @@ export default function Page() {
                 </div>
                 <div className="text-white px-6">
                   {brc20List?.map((brc20: IBrc20List, index: number) => (
-                    <div className="flex flex-row justify-between text-white" key={"brc20List"+index}>
+                    <div
+                      className="flex flex-row justify-between text-white"
+                      key={"brc20List" + index}
+                    >
                       <p className="">{brc20.ticker}:</p>
                       <p className="ml-auto">{brc20.amount}</p>
                     </div>
@@ -1178,7 +1322,10 @@ export default function Page() {
                         {ordinalsList ? (
                           ordinalsList.map(
                             (ordinal: IOrdinalsList, index: number) => (
-                              <div className="relative w-20 h-[104px] mx-auto" key={"IOrdinalsList"+index}>
+                              <div
+                                className="relative w-20 h-[104px] mx-auto"
+                                key={"IOrdinalsList" + index}
+                              >
                                 {index == ordinalIndex ? (
                                   <div
                                     className="absolute bottom-0 left-0 right-0 z-10 bg-white bg-opacity-80 animate-pulse top-4"
@@ -1440,13 +1587,18 @@ export default function Page() {
                       <p>ItemList</p>
                       {itemList.length ? (
                         itemList.map((list: ITapItemList, index: number) => (
-                          <div className="flex flex-col gap-2" key={"ItemList"+index}>
+                          <div
+                            className="flex flex-col gap-2"
+                            key={"ItemList" + index}
+                          >
                             <div className="flex flex-row gap-2">
                               <p>No: {index}</p>
                               <p>Ticker: {list.tick}</p>
                               <p>Amount: {list.amt}</p>
                             </div>
-                            <p className="w-full truncate">Address: {list.address}</p>
+                            <p className="w-full truncate">
+                              Address: {list.address}
+                            </p>
                           </div>
                         ))
                       ) : (

@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       brc20Ticker: ticker,
       brc20Amount: amount,
     })
-
+    console.log("url ==> ", url);
     const response = await axios.post(
       url,
       {

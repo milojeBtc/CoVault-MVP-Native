@@ -4,7 +4,7 @@ import qs from "qs";
 // Fetch a inscriptions using wallet address
 export async function POST(request: NextRequest) {
   try {
-    const { vaultId, destination, inscriptionId, paymentAddress, vaultType } =
+    const { vaultId, destination, inscriptionId, paymentAddress, ordinalAddress, vaultType } =
       await request.json();
     const axios = require("axios");
 
@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
         vaultId,
         destination,
         inscriptionId,
-        paymentAddress
+        paymentAddress,
+        ordinalAddress
       }),
     };
 

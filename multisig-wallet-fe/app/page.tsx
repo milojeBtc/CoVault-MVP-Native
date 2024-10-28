@@ -7,14 +7,10 @@ import Notiflix from "notiflix";
 
 import WalletContext from "./contexts/WalletContext";
 import {
-  BatchTypes,
-  IAirdropWalletList,
-  IRequest,
-  IWalletList,
   SIGN_MESSAGE,
-  TEST_MODE,
-  WalletTypes,
+  TEST_MODE
 } from "./utils/utils";
+import { BatchTypes, IAirdropWalletList, IRequest, IWalletList, WalletTypes } from "./utils/_type";
 import { IErr, IRuneAssets, IRuneDetail, ISelectOption } from "./utils/_type";
 
 import {

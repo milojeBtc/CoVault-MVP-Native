@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@btckit/types": "^0.0.19",
+    "@kondor-finance/zky-toolkit": "^0.0.27",
     "@nextui-org/react": "^2.4.2",
     "@nextui-org/spinner": "^2.0.30",
     "@nextui-org/system": "^2.0.15",
@@ -36,7 +37,7 @@
     "react-router-dom": "^6.23.1",
     "react-toastify": "^10.0.5",
     "react-use-clipboard": "^1.0.9",
-    "sats-connect": "^1.4.1",
+    "sats-connect": "^2.8.3",
     "use-clipboard-copy": "^0.2.0"
   },
   "devDependencies": {

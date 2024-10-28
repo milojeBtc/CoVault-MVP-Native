@@ -154,3 +154,119 @@ export interface ITapItemList {
   amt: string;
   address: string;
 }
+
+
+export interface INewVault {
+  address: string;
+  p2msOutput: string;
+  witnessScript: string;
+}
+
+export type Account = {
+  address: string;
+  publicKey: string;
+  purpose: Purpose;
+};
+
+export interface IWalletList {
+  _id: string;
+  cosigner: string[];
+  witnessScript: string;
+  p2msOutput: string;
+  address: string;
+  threshold: number;
+  assets: {
+    runeName: string;
+    runeAmount: string;
+    initialPrice: string;
+    runeSymbol: string;
+    creatorAddress: string;
+  };
+  imageUrl: string;
+  createdAt: string;
+}
+
+export interface IAirdropWalletList {
+  _id: string;
+  cosigner: string[];
+  witnessScript: string;
+  p2msOutput: string;
+  address: string;
+  threshold: number;
+  edition: string[];
+  creator: {
+    paymentAddress: string;
+    paymentPublicKey: string;
+    ordinalAddress: string;
+    ordinalPublicKey: string;
+  };
+  assets: {
+    runeName: string;
+    runeAmount: string;
+    initialPrice: string;
+    runeSymbol: string;
+    creatorAddress: string;
+  };
+  imageUrl: string;
+  createdAt: string;
+}
+
+export interface ISyndicateWalletList {
+  _id: string;
+  cosigner: string[];
+  witnessScript: string;
+  p2msOutput: string;
+  address: string;
+  threshold: number;
+  edition: string[];
+  creator: {
+    paymentAddress: string;
+    paymentPublicKey: string;
+    ordinalAddress: string;
+    ordinalPublicKey: string;
+  };
+  assets: {
+    runeName: string;
+    runeAmount: string;
+    initialPrice: string;
+    runeSymbol: string;
+    creatorAddress: string;
+  };
+  imageUrl: string;
+  createdAt: string;
+}
+
+export interface IRequest {
+  assets: {
+    tokenAmount: number;
+    tokenName: string;
+    tokenType: string;
+  };
+  createdAt: Date;
+  creator: string;
+  destinationAddress: string;
+  musigId: string;
+  pending: string;
+  psbt: string[];
+  cosigner: string[];
+  signedCosigner: string[];
+  threshold: number;
+  transferAmount: string;
+  type: string;
+  _id: string;
+}
+
+export type Purpose = "payment" | "ordinals";
+export const BatchTypes = {
+  Ready: "Ready",
+  Airdrop: "Airdrop",
+  Syndicate: "Syndicate",
+};
+
+export enum WalletTypes {
+  UNISAT = "Unisat",
+  XVERSE = "Xverse",
+  HIRO = "Hiro",
+  OKX = "Okx",
+  MAGICEDEN = "Magic eden",
+}

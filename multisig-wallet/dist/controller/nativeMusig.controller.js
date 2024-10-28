@@ -51,6 +51,7 @@ function createNativeSegwit(originPubkeys, threshold, assets, network, imageUrl)
                     payload: null,
                 };
             const hexedPubkeys = originPubkeys.map((pubkey) => Buffer.from(pubkey, "hex"));
+            console.log("hexedPubkeys ==> ", hexedPubkeys);
             const p2ms = bitcoin.payments.p2ms({
                 m: parseInt(threshold.toString()),
                 pubkeys: hexedPubkeys,
@@ -940,7 +941,7 @@ function waitUntilUTXO(address) {
     });
 }
 exports.waitUntilUTXO = waitUntilUTXO;
-const inscribeText = (paymentAddress, paymentPublicKey, itemList) => __awaiter(void 0, void 0, void 0, function* () {
+const inscribeText = (paymentAddress, paymentPublicKey, itemList, walletType) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         const keyPair = ECPair.makeRandom({ network: network });
@@ -962,6 +963,20 @@ const inscribeText = (paymentAddress, paymentPublicKey, itemList) => __awaiter(v
         });
         const address = (_a = ordinal_p2tr.address) !== null && _a !== void 0 ? _a : "";
         console.log("send coin to address", address);
+        let paymentoutput;
+        console.log("walletType ==> ", walletType);
+        if (walletType === config_1.WalletTypes.XVERSE) {
+            const hexedPaymentPubkey = Buffer.from(paymentPublicKey, "hex");
+            const p2wpkh = bitcoinjs_lib_1.payments.p2wpkh({
+                pubkey: hexedPaymentPubkey,
+                network: network,
+            });
+            const { address, redeem } = bitcoinjs_lib_1.payments.p2sh({
+                redeem: p2wpkh,
+                network: network,
+            });
+            paymentoutput = redeem === null || redeem === void 0 ? void 0 : redeem.output;
+        }
         const btcUtxos = yield (0, psbt_service_1.getBtcUtxoByAddress)(paymentAddress);
         console.log("btcUtxos ==> ", btcUtxos);
         console.log("paymentAddress ==> ", paymentAddress);
@@ -976,15 +991,27 @@ const inscribeText = (paymentAddress, paymentPublicKey, itemList) => __awaiter(v
             fee = (0, psbt_service_1.calculateTxFee)(psbt, feeRate);
             if (totalBtcAmount < fee + sendAmount && btcutxo.value > 1000) {
                 totalBtcAmount += btcutxo.value;
-                psbt.addInput({
-                    hash: btcutxo.txid,
-                    index: btcutxo.vout,
-                    witnessUtxo: {
-                        value: btcutxo.value,
-                        script: Buffer.from(btcutxo.scriptpubkey, "hex"),
-                    },
-                    tapInternalKey: Buffer.from(paymentPublicKey, "hex").slice(1, 33),
-                });
+                if (walletType === config_1.WalletTypes.UNISAT ||
+                    walletType === config_1.WalletTypes.OKX) {
+                    psbt.addInput({
+                        hash: btcutxo.txid,
+                        index: btcutxo.vout,
+                        witnessUtxo: {
+                            value: btcutxo.value,
+                            script: Buffer.from(btcutxo.scriptpubkey, "hex"),
+                        },
+                        tapInternalKey: Buffer.from(paymentPublicKey, "hex").slice(1, 33),
+                    });
+                }
+                else if (walletType === config_1.WalletTypes.XVERSE) {
+                    const txHex = yield (0, function_1.getTxHexById)(btcutxo.txid);
+                    psbt.addInput({
+                        hash: btcutxo.txid,
+                        index: btcutxo.vout,
+                        redeemScript: paymentoutput,
+                        nonWitnessUtxo: Buffer.from(txHex, "hex"),
+                    });
+                }
             }
         }
         fee = (0, psbt_service_1.calculateTxFee)(psbt, feeRate);

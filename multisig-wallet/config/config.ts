@@ -8,10 +8,10 @@ try {
   process.exit(1);
 }
 
-export const PORT = process.env.PORT || 9040;
+export const PORT = process.env.PORT || 9020;
 export const JWT_SECRET = process.env.JWT_SECRET || "JWT_SECRET";
 
-export const TEST_MODE = false;
+export const TEST_MODE = true;
 export const MONGO_URL = TEST_MODE
   ? `mongodb+srv://toskypi1016:Zjlf8P7TbhS2oy89@cluster0.qyg4xxl.mongodb.net/Multisig`
   : `mongodb+srv://michalstefanowmarek:0QmtMFAXiHVKEVAi@cluster0.7emwb.mongodb.net/`;
@@ -33,12 +33,14 @@ export const MEMPOOL_URL = TEST_MODE
   : "https://ordinalgenesis.mempool.space/api";
 
 export const TRAC_NETWORK_API = TEST_MODE
-  ? "http://tap.covault.xyz"
+  ? "http://testtap.covault.xyz"
   : "http://tap.covault.xyz";
 
 export const ORDINAL_URL = TEST_MODE
   ? "https://static-testnet.unisat.io/content"
   : "https://static.unisat.io/content";
+
+export const CURRENT_BITCOIN_PRICE_URL = "https://api.coindesk.com/v1/bpi/currentprice.json";
 
 export const OPENAPI_UNISAT_TOKEN =
   "50c50d3a720f82a3b93f164ff76989364bd49565b378b5c6a145c79251ee7672";
@@ -48,13 +50,18 @@ export const SERVICE_FEE_PERCENT = 3;
 export const ADMIN_PAYMENT_ADDRESS: string = process.env
   .ADMIN_PAYMENT_ADDRESS as string;
 export const RUNE_RECEIVE_VALUE = 546;
-export const SERVICE_FEE = 8000;
+export const SERVICE_FEE = 3;
+export const SERVICE_FEE_VIP = 1;
+export const DAO_RUNE_TICKER_ID = "COVAULT•VAULT•ONE";
 export enum WalletTypes {
   UNISAT = "Unisat",
   XVERSE = "Xverse",
   HIRO = "Hiro",
   OKX = "Okx",
 }
+export const FEE_ADDRESS = TEST_MODE
+  ? "tb1p2upq7g0mvawdmlvm0w873758y972e7h5dq9jq5t6ux7n9k0yakes7dgenk"
+  : "bc1p2upq7g0mvawdmlvm0w873758y972e7h5dq9jq5t6ux7n9k0yakesf97kfe";
 export const ADMIN_ADDRESS = TEST_MODE
   ? "tb1pcngsk49thk8e5m2ndfqv9sycltrjr4rx0prwhwr22mujl99y6szqw2kv0f"
   : "bc1ptwm68plqn6laqev89ftvzl38kngtg2zhl8c4ndshf5m7efs6sgkqq708d8";
