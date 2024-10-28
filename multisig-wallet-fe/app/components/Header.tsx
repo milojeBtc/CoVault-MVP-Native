@@ -117,7 +117,7 @@ const Header = () => {
             setOrdinalPublicKey(pubkey);
             setPaymentPublicKey(pubkey);
 
-            storeLocalStorage(accounts[0], pubkey, accounts[0], pubkey);
+            storeLocalStorage(accounts[0], pubkey, accounts[0], pubkey, WalletTypes.UNISAT);
 
             onClose();
           } else {
@@ -143,7 +143,7 @@ const Header = () => {
           ],
           message: "Welcome Co-vault",
           network: {
-            type: BitcoinNetworkType.Testnet,
+            type: TEST_MODE ? BitcoinNetworkType.Testnet : BitcoinNetworkType.Mainnet,
           },
         },
         onFinish: async (response) => {
@@ -164,7 +164,7 @@ const Header = () => {
           await signMessage({
             payload: {
               network: {
-                type: BitcoinNetworkType.Testnet,
+                type: TEST_MODE ? BitcoinNetworkType.Testnet : BitcoinNetworkType.Mainnet,
               },
               address: paymentAddressItem?.address as string,
               message: "Sign in Co-vault",
@@ -198,7 +198,8 @@ const Header = () => {
               ordinalsAddressItem?.address as string,
               ordinalsAddressItem?.publicKey as string,
               paymentAddressItem?.address as string,
-              paymentAddressItem?.publicKey as string
+              paymentAddressItem?.publicKey as string,
+              WalletTypes.XVERSE
             );
 
             onClose();
@@ -232,12 +233,14 @@ const Header = () => {
     ordinalsAddress: string,
     ordinalsPublickey: string,
     paymentAddress: string,
-    paymentPublicKey: string
+    paymentPublicKey: string,
+    walletType: string
   ) => {
     localStorage.setItem("ordinalsAddress", ordinalsAddress);
     localStorage.setItem("ordinalsPublickey", ordinalsPublickey);
     localStorage.setItem("paymentAddress", paymentAddress);
     localStorage.setItem("paymentPublicKey", paymentPublicKey);
+    localStorage.setItem("walletType", walletType);
   };
 
   const removeLocalStorage = () => {
@@ -245,11 +248,13 @@ const Header = () => {
     localStorage.removeItem("ordinalsPublickey");
     localStorage.removeItem("paymentAddress");
     localStorage.removeItem("paymentPublicKey");
+    localStorage.removeItem("walletType");
 
     setOrdinalAddress("");
     setPaymentAddress("");
     setOrdinalPublicKey("");
     setPaymentPublicKey("");
+    setWalletType("");
   };
 
   const recoverWalletConnection = () => {
@@ -257,17 +262,20 @@ const Header = () => {
     const ordinalsPublickey = localStorage.getItem("ordinalsPublickey");
     const paymentAddress = localStorage.getItem("paymentAddress");
     const paymentPublicKey = localStorage.getItem("paymentPublicKey");
+    const walletType = localStorage.getItem("walletType");
 
     if (
       ordinalsAddress &&
       ordinalsPublickey &&
       paymentAddress &&
-      paymentPublicKey
+      paymentPublicKey && 
+      walletType
     ) {
       setOrdinalAddress(ordinalsAddress);
       setPaymentAddress(paymentAddress);
       setOrdinalPublicKey(ordinalsPublickey);
       setPaymentPublicKey(paymentPublicKey);
+      setWalletType(walletType);
     }
   };
 

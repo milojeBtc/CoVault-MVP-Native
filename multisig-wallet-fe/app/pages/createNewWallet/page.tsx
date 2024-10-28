@@ -21,10 +21,17 @@ import { createNewVault, getFeeLevelController, usdToBtcController } from "@/app
 import { WalletTypes } from "@/app/utils/_type";
 import { DEPLOY_FEE, DEPLOY_FEE_VIP } from "@/app/utils/constant";
 import { FEE_ADDRESS } from "@/app/utils/serverAddress";
-import { useBitcoin } from "@kondor-finance/zky-toolkit";
+// import { useBitcoin } from "@kondor-finance/zky-toolkit";
+import {
+  request,
+  BitcoinNetworkType,
+  signTransaction,
+  SignTransactionOptions,
+  RpcErrorCode,
+} from "sats-connect";
 
 export default function Page() {
-  const { signMessage, signPsbt, sendTransfer } = useBitcoin();
+  // const { signMessage, signPsbt, sendTransfer } = useBitcoin();
   const [selected, setSelected] = useState("multi");
   // CreateNewVault
   const [coSignerCount, setCoSignerCount] = useState(0);
@@ -117,7 +124,7 @@ export default function Page() {
       // Pay the fee for deploy
       const feeLevel = await getFeeLevelController(ordinalAddress);
       console.log("feeLevel ==> ", feeLevel);
-      const satsAmount = await usdToBtcController(feeLevel ?  DEPLOY_FEE_VIP : DEPLOY_FEE);
+      const satsAmount = await usdToBtcController(feeLevel ? DEPLOY_FEE_VIP : DEPLOY_FEE);
       console.log("DEPLOY SATS AMOUNT ==> ", satsAmount);
 
       let payingFeeTxid = "";
@@ -132,19 +139,39 @@ export default function Page() {
           break;
         case WalletTypes.XVERSE:
           console.log("Paying fee with Xverse wallet.")
-          await sendTransfer(FEE_ADDRESS, (satsAmount / Math.pow(10, 8)).toString())
-            .then((txId) => {
-              payingFeeTxid = txId;
-              console.log("Transaction successful with ID:", txId);
-            })
-            .catch((error) => {
-              console.log("error ==> ", error);
-            });
+          // await sendTransfer(FEE_ADDRESS, (satsAmount / Math.pow(10, 8)).toString())
+          //   .then((txId) => {
+          //     payingFeeTxid = txId;
+          //     console.log("Transaction successful with ID:", txId);
+          //   })
+          //   .catch((error) => {
+          //     console.log("error ==> ", error);
+          //   });
+          const response = await request("sendTransfer", {
+            recipients: [
+              {
+                address: FEE_ADDRESS,
+                amount: Number((satsAmount / Math.pow(10, 8))),
+              },
+            ],
+          });
+          console.log("response in xverse ==> ", response);
+            if (response.status === "success") {
+              payingFeeTxid = response.result.txid;
+            } else {
+              if (response.error.code === RpcErrorCode.USER_REJECTION) {
+                // handle user cancellation error
+                Notiflix.Notify.warning("You reject the signing.");
+              } else {
+                // handle error
+                console.log("xverse signing error ==> ");
+              }
+            }
         default:
           break;
       }
 
-      if(!payingFeeTxid) {
+      if (!payingFeeTxid) {
         Notiflix.Loading.remove();
         Notiflix.Notify.failure("Paying Fee is failed.");
         return
@@ -454,379 +481,6 @@ export default function Page() {
                   )}
                 </div>
               </Tab>
-              {/* <Tab
-                key="airdrop"
-                title={
-                  <div className="flex flex-row items-center gap-4">
-                    <SiVaultwarden />
-                    <p>Airdrop Vault</p>
-                  </div>
-                }
-              >
-                <div className="flex flex-col items-center justify-between pt-4">
-                  <div className="flex flex-col gap-2 bg-[#1C1D1F] mx-auto min-[640px]:w-[580px] max-[640px]:w-[530px] rounded-xl">
-                    <div className="flex flex-row justify-center px-2 py-2">
-                      <h3 className="text-[24px] font-manrope text-white leading-8">
-                        Create New Airdrop vault
-                      </h3>
-                    </div>
-                    <div className="flex flex-col w-full gap-4">
-                      <div className="flex flex-col gap-3 ">
-                        <label className="font-manrope text-[14px] font-normal leading-6 text-white">
-                          Vault Type
-                        </label>
-                        <RadioGroup
-                          value={typeSelected}
-                          onValueChange={setTypeSelected}
-                          className="ml-4"
-                        >
-                          <Radio value="NativeSegwit">
-                            <p className="text-white">Native Segwit</p>
-                          </Radio>
-                          <Radio value="Taproot">
-                            <p className="text-white">Taproot</p>
-                          </Radio>
-                        </RadioGroup>
-                      </div>
-                      <div className="flex flex-row gap-4 w-full">
-                        <div className="flex flex-col mx-auto w-1/3 gap-2">
-                          <p className="text-white text-center">Upload Image</p>
-                          <input
-                            type="file"
-                            style={{ display: "none" }}
-                            id="upload-button"
-                            ref={fileInput}
-                            accept="image/*"
-                            onChange={uploadFile}
-                          />
-                          <label htmlFor="upload-button">
-                            {avatar.preview ? (
-                              <img
-                                src={avatar.preview}
-                                alt="dummy"
-                                width="160px"
-                                height="160px"
-                                className=""
-                              />
-                            ) : (
-                              <div className="flex flex-col gap-1 rounded-xl bg-[#28292C] w-40 h-40 justify-center items-center hover:brightness-150 duration-300 cursor-pointer">
-                                <AiOutlineUpload color="white" size={26} />
-                                <p className="text-white">Upload</p>
-                              </div>
-                            )}
-                          </label>
-                        </div>
-                        <div className="flex flex-col gap-2 border-l-2 pl-4 ml-2 border-[#28292C] w-2/3">
-                          <div className="flex flex-col gap-1">
-                            <label className="font-manrope text-[14px] font-normal leading-6 text-white">
-                              RuneName
-                            </label>
-                            <input
-                              name="RuneName"
-                              className="bg-[#131416] border-2 border-[#28292C] p-2 rounded-lg text-white"
-                              placeholder="UNCOMMONGOODS"
-                              ref={runeNameRef}
-                              onChange={() => onChangeHandler()}
-                            />
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <label className="font-manrope text-[14px] font-normal leading-6 text-white">
-                              Rune Amount
-                            </label>
-                            <input
-                              name="RuneAmount"
-                              className="bg-[#131416] border-2 border-[#28292C] p-2 rounded-lg text-white"
-                              placeholder="5000"
-                              ref={runeAmountRef}
-                              onChange={() => onChangeHandler()}
-                            />
-                          </div>
-                          <div className="flex flex-row gap-4 w-full items-center justify-between">
-                            <div className="flex flex-col gap-1 w-2/3">
-                              <label className="font-manrope text-[14px] font-normal leading-6 text-white">
-                                Rune Price
-                              </label>
-                              <input
-                                name="initialPrice"
-                                className="bg-[#131416] border-2 border-[#28292C] p-2 rounded-lg text-white"
-                                placeholder="5000"
-                                ref={runePriceRef}
-                                onChange={() => onChangeHandler()}
-                              />
-                            </div>
-                            <div className="flex flex-col w-1/4">
-                              <label className="font-manrope text-[14px] font-normal leading-6 text-white">
-                                Rune Symbol
-                              </label>
-                              <input
-                                name="RuneSymbol"
-                                className="bg-[#131416] border-2 border-[#28292C] p-2 rounded-lg text-white"
-                                placeholder="$"
-                                ref={runeSymbolRef}
-                                onChange={() => onChangeHandler()}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <button
-                        className="bg-[#FEE505] rounded-xl px-6 py-3 w-full hover:brightness-150 duration-300 mt-4"
-                        type="submit"
-                        onClick={() => onCreateNewAirdropWallet()}
-                      >
-                        <p className="text-black font-manrope text-[18px] font-semibold leading-6 ">
-                          Submit
-                        </p>
-                      </button>
-                      {transactionID ? (
-                        <a
-                          href={`https://mempool.space/testnet/tx/${transactionID}`}
-                        />
-                      ) : (
-                        <></>
-                      )}
-                    </div>
-                  </div>
-
-                  {newVault ? (
-                    <div className="text-white flex flex-col w-11/12">
-                      <p className="truncate text-center">
-                        created vault address
-                      </p>
-                      <p>{newVault}</p>
-                    </div>
-                  ) : (
-                    ""
-                  )}
-                </div>
-              </Tab>
-              <Tab
-                key="syndicate"
-                title={
-                  <div className="flex flex-row items-center gap-4">
-                    <ImShield />
-                    <p>Syndicate Vault</p>
-                  </div>
-                }
-              >
-                <div className="flex flex-col items-center justify-between pt-4">
-                  <div className="flex flex-col gap-2 bg-[#1C1D1F] mx-auto  min-[640px]:w-[600px] max-[640px]:w-[550px] rounded-xl p-3 ">
-                    <div className="flex flex-row justify-center px-4 py-2">
-                      <h3 className="text-[24px] font-manrope text-white leading-8">
-                        Create New Syndicate Vault
-                      </h3>
-                    </div>
-                    <div className="flex flex-col">
-                      <div className="flex flex-col gap-3 ">
-                        <label className="font-manrope text-[14px] font-normal leading-6 text-white">
-                          Vault Type
-                        </label>
-                        <RadioGroup
-                          value={typeSelected}
-                          onValueChange={setTypeSelected}
-                          className="ml-4"
-                        >
-                          <Radio value="NativeSegwit">
-                            <p className="text-white">Native Segwit</p>
-                          </Radio>
-                          <Radio value="Taproot">
-                            <p className="text-white">Taproot</p>
-                          </Radio>
-                        </RadioGroup>
-                      </div>
-                      <div className="flex flex-col gap-4">
-                        <div className="flex flex-col gap-1">
-                          <label className="font-manrope text-[14px] font-normal leading-6 text-white">
-                            Co-signer
-                          </label>
-                          <textarea
-                            className="bg-[#131416] border-2 border-[#28292C] p-3 rounded-xl text-white"
-                            placeholder="Add co-signer wallet address"
-                            ref={coSignerRef}
-                            onChange={() => onChangeHandler()}
-                          />
-
-                          {err ? (
-                            <p className="text-red-600">{err.cosigner}</p>
-                          ) : (
-                            <></>
-                          )}
-                          <label className="font-manrope text-[14px] font-normal leading-6 text-gray-500">
-                            input vault address then press space to add
-                          </label>
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                          <label className="font-manrope text-[14px] font-normal leading-6 text-white">
-                            Threshold vaule
-                          </label>
-                          <div className="flex flex-row items-center gap-4">
-                            <div className="flex flex-row items-center gap-2 bg-[#131416] border-2 border-[#28292C] rounded-xl focus:outline-none">
-                              <div
-                                className="w-[40px] h-[40px] flex justify-center items-center cursor-pointer hover:brightness-150 duration-300"
-                                onClick={() => changeCosignerHandler(-1)}
-                              >
-                                <FaMinus color="gray" size={20} />
-                              </div>
-                              <p className="text-white text-center w-[200px]">
-                                {coSigner}
-                              </p>
-
-                              <div
-                                className="w-[40px] h-[40px] flex justify-center items-center cursor-pointer hover:brightness-150 duration-300"
-                                onClick={() => changeCosignerHandler(1)}
-                              >
-                                <FaPlus color="gray" size={20} />
-                              </div>
-                            </div>
-                            <p className="text-white min-w-[600px]">
-                              Out of {coSignerCount} co-signer
-                            </p>
-                          </div>
-
-                          {err ? (
-                            <p className="text-red-600">{err.thresHold}</p>
-                          ) : (
-                            <></>
-                          )}
-                          <label className="font-manrope text-[14px] font-normal leading-6 text-gray-500">
-                            Number of co-signer to confirm any transaction
-                          </label>
-
-                          <Checkbox
-                            radius="lg"
-                            onChange={() => assetsChangeHandler()}
-                            className="mt-4 mb-2"
-                            isSelected={assetsFlag}
-                          >
-                            <p className="text-white">Use Rune as DAO token?</p>
-                          </Checkbox>
-                          {assetsFlag ? (
-                            <div className="flex flex-row justify-between gap-4 pt-4 border-t-2 border-[#28292C]">
-                              <div className="flex flex-col mx-auto gap-1">
-                                <p className="text-white text-center">
-                                  Upload Image
-                                </p>
-                                <input
-                                  type="file"
-                                  style={{ display: "none" }}
-                                  id="upload-button"
-                                  ref={fileInput}
-                                  accept="image/*"
-                                  onChange={uploadFile}
-                                />
-                                <label htmlFor="upload-button">
-                                  {avatar.preview ? (
-                                    <img
-                                      src={avatar.preview}
-                                      alt="dummy"
-                                      width="160px"
-                                      height="160px"
-                                      className=""
-                                    />
-                                  ) : (
-                                    <div className="flex flex-col gap-1 rounded-xl bg-[#28292C] w-40 h-40 justify-center items-center hover:brightness-150 duration-300 cursor-pointer">
-                                      <AiOutlineUpload
-                                        color="white"
-                                        size={26}
-                                      />
-                                      <p className="text-white">Upload</p>
-                                    </div>
-                                  )}
-                                </label>
-                              </div>
-                              <div className="flex flex-col gap-2 w-full pl-4 border-l-2 border-[#28292C]">
-                                <div className="flex flex-col gap-1">
-                                  <label className="font-manrope text-[14px] font-normal leading-6 text-white">
-                                    RuneName
-                                  </label>
-                                  <input
-                                    name="RuneName"
-                                    className="bg-[#16171B] rounded-xl p-2 gap-2 placeholder:text-gray-600 text-white focus:outline-none border-2 border-[#28292C]"
-                                    placeholder="UNCOMMONGOODS"
-                                    ref={runeNameRef}
-                                    onChange={() => onChangeHandler()}
-                                  />
-                                </div>
-                                <div className="flex flex-col gap-1">
-                                  <label className="font-manrope text-[14px] font-normal leading-6 text-white">
-                                    Rune Amount
-                                  </label>
-                                  <input
-                                    name="RuneAmount"
-                                    className="bg-[#16171B] rounded-xl p-2 gap-2 placeholder:text-gray-600 text-white focus:outline-none border-2 border-[#28292C]"
-                                    placeholder="5000"
-                                    ref={runeAmountRef}
-                                    onChange={() => onChangeHandler()}
-                                  />
-                                </div>
-                                <div className="flex flex-col gap-1">
-                                  <label className="font-manrope text-[14px] font-normal leading-6 text-white">
-                                    Rune Price
-                                  </label>
-                                  <input
-                                    name="initialPrice"
-                                    className="bg-[#16171B] rounded-xl p-2 gap-2 placeholder:text-gray-600 text-white focus:outline-none border-2 border-[#28292C]"
-                                    placeholder="5000"
-                                    ref={runePriceRef}
-                                    onChange={() => onChangeHandler()}
-                                  />
-                                </div>
-                                <div className="flex flex-col gap-1">
-                                  <label className="font-manrope text-[14px] font-normal leading-6 text-white">
-                                    Rune Symbol
-                                  </label>
-                                  <input
-                                    name="RuneSymbol"
-                                    className="bg-[#16171B] rounded-xl p-2 gap-2 placeholder:text-gray-600 text-white focus:outline-none border-2 border-[#28292C]"
-                                    placeholder="5000"
-                                    ref={runeSymbolRef}
-                                    onChange={() => onChangeHandler()}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          ) : (
-                            <></>
-                          )}
-                        </div>
-                      </div>
-
-                      <button
-                        className="bg-[#FEE505] rounded-xl px-6 py-3 w-full hover:brightness-150 duration-300 mt-10"
-                        type="submit"
-                        onClick={() => onCreateNewSyndicateVault()}
-                      >
-                        <div className="flex flex-row gap-4 items-center justify-center">
-                          <FaVault />
-                          <p className="text-black font-manrope text-[14px] font-semibold leading-6 ">
-                            Create New Syndicate vault
-                          </p>
-                        </div>
-                      </button>
-                      {transactionID ? (
-                        <a
-                          href={`https://mempool.space/testnet/tx/${transactionID}`}
-                        />
-                      ) : (
-                        <></>
-                      )}
-                    </div>
-                  </div>
-
-                  {newVault ? (
-                    <div className="text-white flex flex-col w-11/12">
-                      <p className="truncate text-center">
-                        created Vault address
-                      </p>
-                      <p>{newVault}</p>
-                    </div>
-                  ) : (
-                    ""
-                  )}
-                </div>
-              </Tab> */}
             </Tabs>
           </CardBody>
         </Card>

@@ -441,7 +441,7 @@ export default function Page() {
             //   .catch((error) => {
             //     console.error("Error sending transfer:", error);
             //   });
-
+            console.log("Xvese send Transfer before =============>> ");
             const response = await request("sendTransfer", {
               recipients: [
                 {
