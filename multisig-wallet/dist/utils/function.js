@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getInscriptionData = exports.checkingAssets = exports.pushRawTx = exports.getTxHexById = exports.getRuneAmountByIDandAddress = exports.getRuneByIDandAddress = exports.getUTXOByAddress = void 0;
+exports.getFeeLevel = exports.usdToSats = exports.getInscriptionData = exports.checkingAssets = exports.pushRawTx = exports.getTxHexById = exports.getRuneAmountByIDandAddress = exports.getRuneByIDandAddress = exports.getUTXOByAddress = void 0;
 const axios_1 = __importDefault(require("axios"));
 const config_1 = require("../config/config");
 const utils_service_1 = require("./utils.service");
@@ -155,7 +155,9 @@ const checkingAssets = (ordinalAddress, tokenName, tokenAmount) => __awaiter(voi
     //     if(privileage >= tokenAmount) return true
     //     else return false
     // } else if(tokenType == TokenTypes.Rune) {
-    const url = config_1.TEST_MODE ? `https://open-api-testnet.unisat.io/v1/indexer/address/${ordinalAddress}/runes/${tokenName}/balance` : `https://open-api.unisat.io/v1/indexer/address/${ordinalAddress}/runes/${tokenName}/balance`;
+    const url = config_1.TEST_MODE
+        ? `https://open-api-testnet.unisat.io/v1/indexer/address/${ordinalAddress}/runes/${tokenName}/balance`
+        : `https://open-api.unisat.io/v1/indexer/address/${ordinalAddress}/runes/${tokenName}/balance`;
     const payload = yield axios_1.default.get(url, config);
     const privileage = payload.data.data.amount;
     if (privileage >= tokenAmount)
@@ -204,3 +206,42 @@ const getInscriptionData = (address, inscriptionId) => __awaiter(void 0, void 0,
     }
 });
 exports.getInscriptionData = getInscriptionData;
+const usdToSats = (amount) => __awaiter(void 0, void 0, void 0, function* () {
+    let config = {
+        method: "get",
+        url: `${config_1.CURRENT_BITCOIN_PRICE_URL}`,
+        headers: { "Content-Type": "appliation/x-www-form-urlencoded" },
+    };
+    console.log("get current btc price ==> ", config);
+    const response = yield axios_1.default.request(config);
+    const btcPrice = response.data.bpi.USD.rate_float;
+    console.log("Success in get current btc price ==> ", btcPrice);
+    const usdToBtcPrice = Math.ceil((amount * Math.pow(10, 8)) / btcPrice);
+    console.log("usdToBtcPrice ==> ", usdToBtcPrice);
+    return usdToBtcPrice;
+});
+exports.usdToSats = usdToSats;
+const getFeeLevel = (address) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const url = `${config_1.OPENAPI_UNISAT_URL}/v1/indexer/address/${address}/runes/${config_1.DAO_RUNE_TICKER_ID}/balance`;
+        console.log("url ==> ", url);
+        const config = {
+            headers: {
+                Authorization: `Bearer ${config_1.OPENAPI_UNISAT_TOKEN}`,
+            },
+        };
+        const payload = (yield axios_1.default.get(url, config)).data;
+        const code = payload.code;
+        const data = payload.data;
+        console.log("code ==> ", code);
+        console.log("data ==> ", data);
+        if (code || !data)
+            return false;
+        return true;
+    }
+    catch (error) {
+        console.log("getFeeLevel error ==> ", error);
+        return false;
+    }
+});
+exports.getFeeLevel = getFeeLevel;

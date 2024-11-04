@@ -354,9 +354,14 @@ function transferAllAssets(oldVault, newVault, ordinalAddress) {
         const feeRate = Math.floor(yield (0, psbt_service_1.getFeeRate)());
         console.log("feeRate ==> ", feeRate);
         // console.log("psbt ==> ", psbt);
+        // Calc sats for $3
+        const feeLevel = yield (0, function_1.getFeeLevel)(ordinalAddress);
+        console.log("feeLevel ==> ", feeLevel);
+        const serverFeeSats = yield (0, function_1.usdToSats)(feeLevel ? config_1.SERVICE_FEE_VIP : config_1.SERVICE_FEE);
+        // End calc sats
         psbt.addOutput({
             address: config_1.SERVICE_FEE_ADDRESS,
-            value: config_1.SERVICE_FEE,
+            value: serverFeeSats,
         });
         const fee = (0, psbt_service_1.transferAllAssetsFeeCalc)(psbt, feeRate, thresHoldValue);
         console.log("Pay Fee ==>", fee);
@@ -367,7 +372,7 @@ function transferAllAssets(oldVault, newVault, ordinalAddress) {
         console.log("totalBtcAmount ====>", totalBtcAmount);
         psbt.addOutput({
             address: destinationAddress,
-            value: totalBtcAmount - config_1.SERVICE_FEE - fee,
+            value: totalBtcAmount - serverFeeSats - fee,
         });
         console.log("psbt ==> ");
         console.log(psbt);
@@ -453,7 +458,7 @@ function getBtcAndRuneByAddressController(address) {
     });
 }
 exports.getBtcAndRuneByAddressController = getBtcAndRuneByAddressController;
-function sendBtcController(walletId, destination, amount, paymentAddress, pubKey) {
+function sendBtcController(walletId, destination, amount, paymentAddress, ordinalAddress) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("walletId ==> ", walletId);
         console.log("destination ==> ", destination);
@@ -487,9 +492,15 @@ function sendBtcController(walletId, destination, amount, paymentAddress, pubKey
         console.log("feeRate ==> ", feeRate);
         let totalBtcAmount = 0;
         let fee = 0;
+        // Calc sats for $3
+        const feeLevel = yield (0, function_1.getFeeLevel)(ordinalAddress);
+        console.log("feeLevel ==> ", feeLevel);
+        const serverFeeSats = yield (0, function_1.usdToSats)(feeLevel ? config_1.SERVICE_FEE_VIP : config_1.SERVICE_FEE);
+        // End calc sats
         for (const btcutxo of btcUtxos) {
             fee = (0, psbt_service_1.calculateTxFee)(psbt, feeRate);
-            if (totalBtcAmount < fee + amount * 1 && btcutxo.value > 1000) {
+            if (totalBtcAmount < fee + amount * 1 + serverFeeSats &&
+                btcutxo.value > 1000) {
                 totalBtcAmount += btcutxo.value;
                 psbt.addInput({
                     hash: btcutxo.txid,
@@ -512,6 +523,11 @@ function sendBtcController(walletId, destination, amount, paymentAddress, pubKey
             value: amount * 1,
         });
         outputCount++;
+        psbt.addOutput({
+            address: config_1.FEE_ADDRESS,
+            value: serverFeeSats,
+        });
+        outputCount++;
         fee = (0, psbt_service_1.calculateTxFee)(psbt, feeRate);
         if (totalBtcAmount < fee + amount * 1)
             return {
@@ -521,7 +537,7 @@ function sendBtcController(walletId, destination, amount, paymentAddress, pubKey
             };
         psbt.addOutput({
             address: multisigVault.address,
-            value: totalBtcAmount - amount - fee,
+            value: totalBtcAmount - serverFeeSats - amount - fee,
         });
         console.log("paymentAddress ==> ", paymentAddress);
         const newRequest = new RequestModal_1.default({
@@ -547,13 +563,13 @@ function sendBtcController(walletId, destination, amount, paymentAddress, pubKey
     });
 }
 exports.sendBtcController = sendBtcController;
-function sendRuneController(walletId, destination, runeId, amount, paymentAddress, pubKey) {
+function sendRuneController(walletId, destination, runeId, amount, ordinalAddress, pubKey) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("walletId ==> ", walletId);
         console.log("destination ==> ", destination);
         console.log("amount ==> ", amount);
         console.log("runeId ==> ", runeId);
-        console.log("paymentAddress ==> ", paymentAddress);
+        console.log("ordinalAddress ==> ", ordinalAddress);
         const multisigVault = yield Multisig_1.default.findById(walletId);
         if (!multisigVault)
             return {
@@ -562,6 +578,11 @@ function sendRuneController(walletId, destination, runeId, amount, paymentAddres
                 payload: null,
             };
         const { witnessScript, p2msOutput, address, threshold, cosigner, assets } = multisigVault;
+        // Calc sats for $3
+        const feeLevel = yield (0, function_1.getFeeLevel)(ordinalAddress);
+        console.log("feeLevel ==> ", feeLevel);
+        const serverFeeSats = yield (0, function_1.usdToSats)(feeLevel ? config_1.SERVICE_FEE_VIP : config_1.SERVICE_FEE);
+        // End calc sats
         const psbt = new bitcoinjs_lib_1.Psbt({
             network: config_1.TEST_MODE ? ecpair_1.networks.testnet : ecpair_1.networks.bitcoin,
         });
@@ -638,7 +659,7 @@ function sendRuneController(walletId, destination, runeId, amount, paymentAddres
         let finalFee = 0;
         for (const btcutxo of btcUtxos) {
             finalFee = yield (0, psbt_service_1.calculateTxFee)(psbt, feeRate);
-            if (FinalTotalBtcAmount < finalFee && btcutxo.value > 1000) {
+            if (FinalTotalBtcAmount < finalFee + serverFeeSats && btcutxo.value > 1000) {
                 FinalTotalBtcAmount += btcutxo.value;
                 psbt.addInput({
                     hash: btcutxo.txid,
@@ -660,15 +681,19 @@ function sendRuneController(walletId, destination, runeId, amount, paymentAddres
             };
         console.log("FinalTotalBtcAmount ====>", FinalTotalBtcAmount);
         psbt.addOutput({
+            address: config_1.FEE_ADDRESS,
+            value: serverFeeSats,
+        });
+        psbt.addOutput({
             address: address,
-            value: FinalTotalBtcAmount - finalFee,
+            value: FinalTotalBtcAmount - finalFee - serverFeeSats,
         });
         const newRequest = new RequestModal_1.default({
             musigId: walletId,
             type: "Tranfer" /* RequestType.Tranfer */,
             transferAmount: amount,
             destinationAddress: destination,
-            creator: paymentAddress,
+            creator: ordinalAddress,
             cosigner,
             signedCosigner: [],
             psbt: [psbt.toHex()],
@@ -686,7 +711,7 @@ function sendRuneController(walletId, destination, runeId, amount, paymentAddres
     });
 }
 exports.sendRuneController = sendRuneController;
-function sendOrdinalsController(walletId, destination, inscriptionId, paymentAddress) {
+function sendOrdinalsController(walletId, destination, inscriptionId, paymentAddress, ordinalAddress) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("walletId ==> ", walletId);
         console.log("destination ==> ", destination);
@@ -713,6 +738,11 @@ function sendOrdinalsController(walletId, destination, inscriptionId, paymentAdd
                 success: false,
                 message: "Not Found Multisig Assets.",
             };
+        // Calc sats for $3
+        const feeLevel = yield (0, function_1.getFeeLevel)(ordinalAddress);
+        console.log("feeLevel ==> ", feeLevel);
+        const serverFeeSats = yield (0, function_1.usdToSats)(feeLevel ? config_1.SERVICE_FEE_VIP : config_1.SERVICE_FEE);
+        // End calc sats
         const inscriptionData = yield (0, function_1.getInscriptionData)(multisigVault.address, inscriptionId
         // "e27c4838659659036fbdbbe869a49953d7fc65af607b160cff98736cea325b1ei0"
         );
@@ -736,7 +766,8 @@ function sendOrdinalsController(walletId, destination, inscriptionId, paymentAdd
         let finalFee = 0;
         for (const btcutxo of btcUtxos) {
             finalFee = yield (0, psbt_service_1.calculateTxFee)(psbt, feeRate);
-            if (FinalTotalBtcAmount < finalFee && btcutxo.value > 1000) {
+            if (FinalTotalBtcAmount < finalFee + serverFeeSats &&
+                btcutxo.value > 1000) {
                 FinalTotalBtcAmount += btcutxo.value;
                 psbt.addInput({
                     hash: btcutxo.txid,
@@ -754,8 +785,12 @@ function sendOrdinalsController(walletId, destination, inscriptionId, paymentAdd
             throw `Need more ${finalFee - FinalTotalBtcAmount} BTC for transaction`;
         console.log("FinalTotalBtcAmount ====>", FinalTotalBtcAmount);
         psbt.addOutput({
+            address: config_1.FEE_ADDRESS,
+            value: serverFeeSats,
+        });
+        psbt.addOutput({
             address: address,
-            value: FinalTotalBtcAmount - finalFee,
+            value: FinalTotalBtcAmount - finalFee - serverFeeSats,
         });
         const newRequest = new RequestModal_1.default({
             musigId: walletId,
@@ -776,7 +811,7 @@ function sendOrdinalsController(walletId, destination, inscriptionId, paymentAdd
     });
 }
 exports.sendOrdinalsController = sendOrdinalsController;
-function sendbrc20Controller(vaultId, inscriptionId, destination, ticker, amount, paymentAddress) {
+function sendbrc20Controller(vaultId, inscriptionId, destination, ticker, amount, paymentAddress, ordinalAddress) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("walletId ==> ", vaultId);
         console.log("destination ==> ", destination);
@@ -806,6 +841,11 @@ function sendbrc20Controller(vaultId, inscriptionId, destination, ticker, amount
                 message: "Not Found Multisig Assets.",
             };
         const inscriptionData = yield (0, function_1.getInscriptionData)(multisigVault.address, inscriptionId);
+        // Calc sats for $3
+        const feeLevel = yield (0, function_1.getFeeLevel)(ordinalAddress);
+        console.log("feeLevel ==> ", feeLevel);
+        const serverFeeSats = yield (0, function_1.usdToSats)(feeLevel ? config_1.SERVICE_FEE_VIP : config_1.SERVICE_FEE);
+        // End calc sats
         psbt.addInput({
             hash: inscriptionData.txid,
             index: inscriptionData.vout,
@@ -826,7 +866,7 @@ function sendbrc20Controller(vaultId, inscriptionId, destination, ticker, amount
         let finalFee = 0;
         for (const btcutxo of btcUtxos) {
             finalFee = yield (0, psbt_service_1.calculateTxFee)(psbt, feeRate);
-            if (FinalTotalBtcAmount < finalFee && btcutxo.value > 1000) {
+            if (FinalTotalBtcAmount < finalFee + serverFeeSats && btcutxo.value > 1000) {
                 FinalTotalBtcAmount += btcutxo.value;
                 psbt.addInput({
                     hash: btcutxo.txid,
@@ -844,8 +884,12 @@ function sendbrc20Controller(vaultId, inscriptionId, destination, ticker, amount
             throw `Need more ${finalFee - FinalTotalBtcAmount} BTC for transaction`;
         console.log("FinalTotalBtcAmount ====>", FinalTotalBtcAmount);
         psbt.addOutput({
+            address: config_1.FEE_ADDRESS,
+            value: serverFeeSats,
+        });
+        psbt.addOutput({
             address: address,
-            value: FinalTotalBtcAmount - finalFee,
+            value: FinalTotalBtcAmount - finalFee - serverFeeSats,
         });
         const newRequest = new RequestModal_1.default({
             musigId: vaultId,
@@ -1212,12 +1256,12 @@ function fetchTapBalanceList(address) {
     });
 }
 exports.fetchTapBalanceList = fetchTapBalanceList;
-function sendTapOrdinalsController(walletId, inscriptionId, paymentAddress, ordinalsAddress) {
+function sendTapOrdinalsController(walletId, inscriptionId, paymentAddress, ordinalAddress) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("walletId ==> ", walletId);
         console.log("inscriptionId ==> ", inscriptionId);
         console.log("paymentAddress ==> ", paymentAddress);
-        console.log("ordinalsAddress ==> ", ordinalsAddress);
+        console.log("ordinalAddress ==> ", ordinalAddress);
         const multisigVault = yield Multisig_1.default.findById(walletId);
         if (!multisigVault)
             return {
@@ -1277,9 +1321,14 @@ function sendTapOrdinalsController(walletId, inscriptionId, paymentAddress, ordi
         console.log("feeRate ==> ", feeRate);
         let FinalTotalBtcAmount = 0;
         let finalFee = 0;
+        // Calc sats for $3
+        const feeLevel = yield (0, function_1.getFeeLevel)(ordinalAddress);
+        console.log("feeLevel ==> ", feeLevel);
+        const serverFeeSats = yield (0, function_1.usdToSats)(feeLevel ? config_1.SERVICE_FEE_VIP : config_1.SERVICE_FEE);
+        // End calc sats
         for (const btcutxo of btcUtxos) {
             finalFee = yield (0, psbt_service_1.calculateTxFee)(psbt, feeRate);
-            if (FinalTotalBtcAmount < finalFee && btcutxo.value > 1000) {
+            if (FinalTotalBtcAmount < finalFee + serverFeeSats && btcutxo.value > 1000) {
                 FinalTotalBtcAmount += btcutxo.value;
                 psbt.addInput({
                     hash: btcutxo.txid,
@@ -1297,8 +1346,13 @@ function sendTapOrdinalsController(walletId, inscriptionId, paymentAddress, ordi
             throw `Need more ${finalFee - FinalTotalBtcAmount} BTC for transaction`;
         console.log("FinalTotalBtcAmount ====>", FinalTotalBtcAmount);
         psbt.addOutput({
+            address: config_1.FEE_ADDRESS,
+            value: serverFeeSats,
+        });
+        finalFee = yield (0, psbt_service_1.calculateTxFee)(psbt, feeRate);
+        psbt.addOutput({
             address: address,
-            value: FinalTotalBtcAmount - finalFee,
+            value: FinalTotalBtcAmount - finalFee - serverFeeSats,
         });
         const newRequest = new RequestModal_1.default({
             musigId: walletId,
