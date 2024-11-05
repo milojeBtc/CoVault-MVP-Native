@@ -20,12 +20,17 @@ import {
   SignTransactionOptions,
 } from "sats-connect";
 import { useClipboard } from "use-clipboard-copy";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+
+  const router = useRouter();
+
   const [requestList, setRequestList] = useState<IRequest[]>();
   const [selectedRequest, setSelectedRequest] = useState<IRequest>();
 
   const {
+    ordinalAddress,
     paymentPublicKey,
     paymentAddress,
     walletType,
@@ -209,6 +214,14 @@ export default function Page() {
   useEffect(() => {
     fetchRequestList();
   }, [paymentPublicKey]);
+
+  useEffect(() => {
+    if(!ordinalAddress) {
+      Notiflix.Notify.failure("Wallet Connect First..");
+      router.push("/")
+      return
+    }
+  }, []);
 
   return paymentPublicKey ? (
     <div className="flex flex-col gap-10 mt-20 min-h-[100vh-30px]">

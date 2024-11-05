@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const TaprootMultisig = new mongoose.Schema({
+  vaultName: { type: String, required: true },
   cosigner: [
     { type: String, required: true }
   ],

@@ -35,6 +35,7 @@ const network = TEST_MODE ? bitcoin.networks.testnet : bitcoin.networks.bitcoin;
 
 // tb1p6m6r55qey5j9n3f6ds24kzz7acpcktwwwkrx54k35eqnvqtcx5ps65932q
 export const createTaprootMultisig = async (
+  vaultName: string,
   pubkeyList: string[],
   threshold: number,
   assets: IAssets,
@@ -62,6 +63,7 @@ export const createTaprootMultisig = async (
     console.log("address ==> ", multiSigWallet.address);
 
     const newTaproot = new TaprootMultisigModal({
+      vaultName,
       cosigner: pubkeyList,
       threshold,
       privateKey: leafKey.privateKey?.toString("hex"),

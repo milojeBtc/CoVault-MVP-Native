@@ -50,6 +50,9 @@ import TaprootMultisigModal from "../model/TaprootMultisig";
 import { WIFWallet } from "../utils/WIFWallet";
 import { Signer as BTCSigner } from "bitcoinjs-lib";
 import { delay } from "../utils/utils.service";
+import PendingMultisigModal from "../model/PendingMultisig";
+import { IAddress } from "../utils/types";
+import { createTaprootMultisig } from "./taproot.controller";
 
 const bitcoin = require("bitcoinjs-lib");
 const schnorr = require("bip-schnorr");
@@ -65,6 +68,7 @@ const blockstream = new axios.Axios({
 });
 
 export async function createNativeSegwit(
+  vaultName: string,
   originPubkeys: string[],
   threshold: number,
   assets: IAssets,
@@ -95,6 +99,7 @@ export async function createNativeSegwit(
     const p2wsh = bitcoin.payments.p2wsh({ redeem: p2ms, network });
 
     const newMultisigWallet = new MultisigModal({
+      vaultName,
       cosigner: originPubkeys,
       witnessScript: p2wsh.redeem.output.toString("hex"),
       p2msOutput: "0020" + bitcoin.crypto.sha256(p2ms.output).toString("hex"),
@@ -441,7 +446,9 @@ export async function transferAllAssets(
   // Calc sats for $3
   const feeLevel = await getFeeLevel(ordinalAddress);
   console.log("feeLevel ==> ", feeLevel);
-  const serverFeeSats = await usdToSats(feeLevel ? SERVICE_FEE_VIP : SERVICE_FEE);
+  const serverFeeSats = await usdToSats(
+    feeLevel ? SERVICE_FEE_VIP : SERVICE_FEE
+  );
   // End calc sats
 
   psbt.addOutput({
@@ -606,7 +613,9 @@ export async function sendBtcController(
   // Calc sats for $3
   const feeLevel = await getFeeLevel(ordinalAddress);
   console.log("feeLevel ==> ", feeLevel);
-  const serverFeeSats = await usdToSats(feeLevel ? SERVICE_FEE_VIP : SERVICE_FEE);
+  const serverFeeSats = await usdToSats(
+    feeLevel ? SERVICE_FEE_VIP : SERVICE_FEE
+  );
   // End calc sats
 
   for (const btcutxo of btcUtxos) {
@@ -716,7 +725,9 @@ export async function sendRuneController(
   // Calc sats for $3
   const feeLevel = await getFeeLevel(ordinalAddress);
   console.log("feeLevel ==> ", feeLevel);
-  const serverFeeSats = await usdToSats(feeLevel ? SERVICE_FEE_VIP : SERVICE_FEE);
+  const serverFeeSats = await usdToSats(
+    feeLevel ? SERVICE_FEE_VIP : SERVICE_FEE
+  );
   // End calc sats
 
   const psbt = new Psbt({
@@ -807,7 +818,10 @@ export async function sendRuneController(
   let finalFee = 0;
   for (const btcutxo of btcUtxos) {
     finalFee = await calculateTxFee(psbt, feeRate);
-    if (FinalTotalBtcAmount < finalFee + serverFeeSats && btcutxo.value > 1000) {
+    if (
+      FinalTotalBtcAmount < finalFee + serverFeeSats &&
+      btcutxo.value > 1000
+    ) {
       FinalTotalBtcAmount += btcutxo.value;
       psbt.addInput({
         hash: btcutxo.txid,
@@ -908,7 +922,9 @@ export async function sendOrdinalsController(
   // Calc sats for $3
   const feeLevel = await getFeeLevel(ordinalAddress);
   console.log("feeLevel ==> ", feeLevel);
-  const serverFeeSats = await usdToSats(feeLevel ? SERVICE_FEE_VIP : SERVICE_FEE);
+  const serverFeeSats = await usdToSats(
+    feeLevel ? SERVICE_FEE_VIP : SERVICE_FEE
+  );
   // End calc sats
 
   const inscriptionData = await getInscriptionData(
@@ -1045,7 +1061,9 @@ export async function sendbrc20Controller(
   // Calc sats for $3
   const feeLevel = await getFeeLevel(ordinalAddress);
   console.log("feeLevel ==> ", feeLevel);
-  const serverFeeSats = await usdToSats(feeLevel ? SERVICE_FEE_VIP : SERVICE_FEE);
+  const serverFeeSats = await usdToSats(
+    feeLevel ? SERVICE_FEE_VIP : SERVICE_FEE
+  );
   // End calc sats
 
   psbt.addInput({
@@ -1071,7 +1089,10 @@ export async function sendbrc20Controller(
   let finalFee = 0;
   for (const btcutxo of btcUtxos) {
     finalFee = await calculateTxFee(psbt, feeRate);
-    if (FinalTotalBtcAmount < finalFee + serverFeeSats && btcutxo.value > 1000) {
+    if (
+      FinalTotalBtcAmount < finalFee + serverFeeSats &&
+      btcutxo.value > 1000
+    ) {
       FinalTotalBtcAmount += btcutxo.value;
       psbt.addInput({
         hash: btcutxo.txid,
@@ -1655,12 +1676,17 @@ export async function sendTapOrdinalsController(
   // Calc sats for $3
   const feeLevel = await getFeeLevel(ordinalAddress);
   console.log("feeLevel ==> ", feeLevel);
-  const serverFeeSats = await usdToSats(feeLevel ? SERVICE_FEE_VIP : SERVICE_FEE);
+  const serverFeeSats = await usdToSats(
+    feeLevel ? SERVICE_FEE_VIP : SERVICE_FEE
+  );
   // End calc sats
 
   for (const btcutxo of btcUtxos) {
     finalFee = await calculateTxFee(psbt, feeRate);
-    if (FinalTotalBtcAmount < finalFee + serverFeeSats && btcutxo.value > 1000) {
+    if (
+      FinalTotalBtcAmount < finalFee + serverFeeSats &&
+      btcutxo.value > 1000
+    ) {
       FinalTotalBtcAmount += btcutxo.value;
       psbt.addInput({
         hash: btcutxo.txid,
@@ -1712,4 +1738,136 @@ export async function sendTapOrdinalsController(
   console.log("psbt.toHex() ==> ", psbt.toHex());
 
   return psbt.toHex();
+}
+
+export async function createPendingVaultController(
+  vaultName: string,
+  addressList: string[],
+  minSignCount: number,
+  imageUrl: string,
+  vaultType: string,
+  assets: IAssets,
+  creator: IAddress
+) {
+  const pubkeyList = addressList.map(() => "");
+  console.log("pubkeyList ==> ", pubkeyList);
+  const newPendingModal = new PendingMultisigModal({
+    vaultName,
+    addressList,
+    pubkeyList,
+    threshold: minSignCount,
+    vaultType,
+    assets,
+    imageUrl,
+    creator,
+  });
+  await newPendingModal.save();
+
+  return await PendingMultisigModal.find();
+}
+
+export async function joinPendingVaultController(
+  res: any,
+  pendingVaultId: string,
+  ordinalAddress: string,
+  ordinalPubkey: string,
+  paymentAddress: string,
+  paymentPubkey: string
+) {
+  try {
+    const pendingVault = await PendingMultisigModal.findById(pendingVaultId);
+    const assets = pendingVault?.assets;
+
+    if (!assets) {
+      console.log("input assets ==> ", assets);
+      return res.status(200).send({
+        success: false,
+        message: "There is no assets vault in DB",
+        payload: null,
+      });
+    }
+
+    const addressList = pendingVault?.addressList;
+    const pubkeyList = pendingVault?.pubkeyList;
+
+    let cosignerIndex = -1;
+
+    if (!addressList || !pubkeyList)
+      return res.status(200).send({
+        success: false,
+        message: "There is no addressList or PubkeyList in DB",
+        payload: null,
+      });
+
+    cosignerIndex = addressList.findIndex(
+      (address) => address == paymentAddress
+    );
+
+    if (cosignerIndex < 0) {
+      return res.status(200).send({
+        success: false,
+        message: "You are not co-signer of this multisig vault",
+        payload: null,
+      });
+    }
+
+    if (pubkeyList[cosignerIndex])
+      return res.status(200).send({
+        success: false,
+        message: "You already joined",
+        payload: null,
+      });
+
+    pubkeyList[cosignerIndex] = paymentPubkey;
+
+    pendingVault.pubkeyList = pubkeyList;
+    await pendingVault.save();
+
+    let joinedCount = 0;
+    pubkeyList.map((pubkey: string) => {
+      if (pubkey) joinedCount++;
+    });
+
+    const vaultName = pendingVault.vaultName;
+
+    console.log("Joined Count ==> ", joinedCount);
+    if (joinedCount < pubkeyList.length) {
+      return res.status(200).send({
+        success: true,
+        message: "Joined successfully",
+        payload: await PendingMultisigModal.find({ pending: true }),
+      });
+    } else {
+      if (pendingVault.vaultType == VaultType.NativeSegwit) {
+        const payload = await createNativeSegwit(
+          vaultName,
+          pubkeyList,
+          pendingVault.threshold,
+          assets,
+          TEST_MODE ? networks.testnet : networks.bitcoin,
+          pendingVault.imageUrl
+        );
+        pendingVault.pending = false;
+        await pendingVault.save();
+        return res.status(200).send(payload);
+      } else {
+        const payload = await createTaprootMultisig(
+          vaultName,
+          pubkeyList,
+          pendingVault.threshold,
+          assets,
+          pendingVault.imageUrl
+        );
+        pendingVault.pending = false;
+        await pendingVault.save();
+        return res.status(200).send(payload);
+      }
+    }
+  } catch (error) {
+    return res.status(400).send({
+      success: false,
+      payload: error,
+      message: "Got error in join to Pending Vault",
+    });
+  }
 }

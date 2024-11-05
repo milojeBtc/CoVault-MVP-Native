@@ -255,6 +255,8 @@ const Header = () => {
     setOrdinalPublicKey("");
     setPaymentPublicKey("");
     setWalletType("");
+
+    router.push("/");
   };
 
   const recoverWalletConnection = () => {
@@ -290,6 +292,10 @@ const Header = () => {
 
   const updatePageIndex = (index: number, route: string) => {
     console.log("pageIndex ==> ", index);
+    if(!ordinalAddress) {
+      Notiflix.Notify.failure("Wallet Connect First...")
+      return
+    }
     router.push(route);
     setPageIndex(index);
   };
@@ -388,11 +394,13 @@ const Header = () => {
   useEffect(() => {
     if (ordinalAddress) {
       onClose();
+    } else {
+      router.push("/");
     }
   }, [ordinalAddress]);
 
   return (
-    <div className="flex gap-3 bg-[#1C1D1F]">
+    <div className="fixed top-0 left-0 right-0 z-50 flex gap-3 bg-[#1C1D1F] shadow-2xl">
       <Navbar
         isMenuOpen={isMenuOpen}
         onMenuOpenChange={setIsMenuOpen}

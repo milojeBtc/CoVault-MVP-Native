@@ -186,6 +186,32 @@ export interface IWalletList {
   createdAt: string;
 }
 
+export interface IPendingVault {
+  vaultName: string,
+  _id: string;
+  addressList: string[],
+  pubkeyList: string[],
+  threshold: number,
+  vaultType: string
+  assets: {
+      runeName: string;
+      runeAmount: string;
+      initialPrice: string;
+      runeSymbol: string;
+      creatorAddress: string;
+    };
+  imageUrl: string,
+  creator: {
+    walletName: string,
+    ordinalsAddress: string,
+    ordinalsPubkey: string,
+    paymentAddress: string,
+    paymentPubkey: string,
+  },
+  createdAt: Date,
+  pending: boolean
+}
+
 export interface IAirdropWalletList {
   _id: string;
   cosigner: string[];

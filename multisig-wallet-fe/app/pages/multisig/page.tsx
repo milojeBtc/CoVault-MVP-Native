@@ -6,8 +6,8 @@ import Notiflix from "notiflix";
 import { useClipboard } from "use-clipboard-copy";
 
 import WalletContext from "@/app/contexts/WalletContext";
-import { fetchVaultController, updateVault } from "@/app/controller";
-import { IErr } from "@/app/utils/_type";
+import { fetchVaultController, joinPendingVaultController, updateVault } from "@/app/controller";
+import { IErr, IPendingVault } from "@/app/utils/_type";
 import { TEST_MODE } from "@/app/utils/utils";
 import { IWalletList, WalletTypes } from "@/app/utils/_type";
 import { AiOutlineUpload } from "react-icons/ai";
@@ -27,6 +27,7 @@ export default function Page() {
     ordinalAddress,
     paymentAddress,
     paymentPublicKey,
+    ordinalPublicKey,
     pageIndex,
     setPageIndex,
   } = useContext(WalletContext);
@@ -34,8 +35,11 @@ export default function Page() {
   const coSignerRef = useRef(null);
 
   const [loading, setLoading] = useState(false);
+
   const [walletList, setWalletList] = useState<IWalletList[]>();
   const [taprootWalletList, setTaprootWalletList] = useState<IWalletList[]>();
+  const [pendingVaultList, setPendingVaultList] = useState<IPendingVault[]>();
+
   const isConnected = Boolean(paymentAddress);
   const [selectedVault, setSelectedVault] = useState<IWalletList>();
 
@@ -44,6 +48,9 @@ export default function Page() {
   const [coSigner, setCoSigner] = useState(0);
   const [newVault, setNewVault] = useState<string>("");
   const [transactionID, setTransactionID] = useState("");
+
+  // const [pendingCount, setPendingCount] = useState(0);
+  // const [joinedCount, setJoinedCount] = useState(0);
 
   const router = useRouter();
 
@@ -61,6 +68,7 @@ export default function Page() {
         console.log("Native Address ==> ", result.payload.native);
         console.log("Taproot Address ==> ", result.payload.taproot);
         setTaprootWalletList(result.payload.taproot);
+        setPendingVaultList(result.payload.pendingVault);
       } else {
         Notiflix.Loading.remove();
         Notiflix.Notify.failure(result.message);
@@ -181,173 +189,279 @@ export default function Page() {
     router.push("/pages/multisig/" + id);
   };
 
+  const joinHandler = async (pendingVaultId: string) => {
+    Notiflix.Loading.hourglass("Joinning to Pending Vault...");
+    const result = await joinPendingVaultController(
+      ordinalPublicKey,
+      ordinalAddress,
+      paymentAddress,
+      paymentPublicKey,
+      pendingVaultId
+    );
+    console.log("Join Pending vault Result ==> ", result);
+    if(result.success) {
+      Notiflix.Notify.success(result.message);
+      setPendingVaultList(result.payload);
+      if(result.payload.DBID) {
+        await fetchWallets();
+      }
+    } else {
+      Notiflix.Notify.failure(result.message);
+    }
+    Notiflix.Loading.remove();
+  }
+
+  useEffect(() => {
+    if (!ordinalAddress) {
+      Notiflix.Notify.failure("Wallet Connect First..");
+      router.push("/")
+      return
+    }
+  }, []);
+
   return isConnected ? (
     pageIndex == 0 ? (
-      <div className="flex flex-col">
-        <p className="text-white text-[24px] text-center mt-6 mb-4">
-          Native Segwit Vault
-        </p>
-        <div className="flex flex-wrap mx-4 items-start justify-around pt-4 gap-4">
-          {walletList?.length ? (
-            walletList.map((wallet: IWalletList, index: number) =>
-              wallet.cosigner.includes(paymentPublicKey) ? (
-                <div
-                  className="flex flex-col gap-3 w-[450px] px-6 rounded-3xl border-2 border-[#2C2C2C] bg-[#1C1D1F] p-4 text-white"
-                  key={index + "wallet"}
-                >
-                  <div className="flex flex-row gap-4 pb-5 border-b-2 border-b-[#28292C] items-center">
-                    <img
-                      className="rounded-full p-2 border-2 border-[#28292C] w-[50px] h-[50px]"
-                      src={
-                        wallet.imageUrl
-                          ? `/uploads/${wallet.imageUrl}`
-                          : "/multi-vault.png"
-                      }
-                    ></img>
-                    <div className="flex flex-col truncate">
-                      <p>Vault address</p>
-                      <div className="flex flex-row gap-2 items-center">
-                        <p className="text-[#FEE505] font-bold truncate underline underline-offset-4">
-                          {wallet.address}
-                        </p>
-                        <MdOutlineContentCopy
-                          size={36}
-                          className="text-[#5C636C] hover:text-white duration-300 cursor-pointer"
-                          onClick={() => onCopyClipboard(wallet.address)}
-                        />
+      <div className="flex flex-col gap-20 mt-20">
+        <div className="flex flex-col gap-2 mt-20">
+          <p className="text-white text-[24px] text-center">
+            Pending Vault
+          </p>
+          <div className="flex flex-wrap mx-4 items-start justify-around pt-4 gap-4">
+            {pendingVaultList?.length ? (
+              pendingVaultList.map((wallet: IPendingVault, index: number) =>
+                wallet.addressList.includes(paymentAddress) ? (
+                  <div
+                    className="flex flex-col gap-3 w-[450px] px-6 rounded-3xl border-2 border-[#2C2C2C] bg-[#1C1D1F] p-4 text-white"
+                    key={index + "wallet"}
+                  >
+                    <div className="flex flex-row gap-4 pb-5 border-b-2 border-b-[#28292C] items-center">
+                      <img
+                        className="rounded-full p-2 border-2 border-[#28292C] w-[50px] h-[50px]"
+                        src={
+                          wallet.imageUrl
+                            ? `/uploads/${wallet.imageUrl}`
+                            : "/multi-vault.png"
+                        }
+                      ></img>
+                      <p className="text-center text-[#FEE505] text-[26px] pl-4">{wallet.vaultName}</p>
+                    </div>
+                    <div className="flex flex-col justify-between mt-4">
+                      <p className="mr-10">Cosigners: </p>
+                      <div className="flex flex-col pl-4">
+                        {wallet.addressList.map(list => <div className="truncate">{list}</div>)}
                       </div>
                     </div>
-                  </div>
-                  <div className="flex flex-row justify-between mt-4">
-                    <p className="mr-10">Cosigners: </p>
-                    {wallet.cosigner.map((cosigner, index) => (
+                    <div className="flex flex-row justify-between">
+                      <p>Threshold:</p>
+                      <p>{wallet.threshold}</p>
+                    </div>
+                    <div className="flex flex-row justify-between pb-6 border-b-2 border-[#2C2C2C] mb-4">
+                      <p>CreatedAt:</p>
+                      <p>{wallet.createdAt.toString().split("T")[0]}</p>
+                    </div>
+                    <div className="flex flex-row justify-around">
+                      <div className="">Joined: {wallet.pubkeyList.filter(list => list).length}</div>
+                      <div className="">Pending: {wallet.pubkeyList.filter(list => !list).length}</div>
+                    </div>
+                    {wallet.pubkeyList.includes(paymentPublicKey) ?
                       <div
-                        className="truncate bg-[#28292C] ml-2 rounded-xl px-2"
-                        key={"cosinger" + index}
+                        className="w-full rounded-lg p-[2px] bg-gradient-to-b from-[#2b2e31] to-[#171718] cursor-not-allowed"
                       >
-                        {cosigner}
-                      </div>
-                    ))}
+                        <div className="flex bg-[#1b1b1b] justify-center items-center h-full rounded-lg py-2">
+                          <p className="text-white text-center align-middle">
+                            You already joined
+                          </p>
+                        </div>
+                      </div> :
+                      <div
+                        className="w-full rounded-lg p-[2px] bg-gradient-to-b from-[#6B737D] to-[#1C1D1F] cursor-pointer hover:brightness-150 duration-300"
+                        onClick={() => joinHandler(wallet._id)}
+                      >
+                        <div className="flex bg-[#28292C] justify-center items-center h-full rounded-lg py-2">
+                          <p className="text-white text-center align-middle">
+                            Join
+                          </p>
+                        </div>
+                      </div>}
                   </div>
-                  <div className="flex flex-row justify-between">
-                    <p>Threshold:</p>
-                    <p>{wallet.threshold}</p>
-                  </div>
-                  <div className="flex flex-row justify-between pb-6 border-b-2 border-[#2C2C2C] mb-4">
-                    <p>CreatedAt:</p>
-                    <p>{wallet.createdAt.split("T")[0]}</p>
-                  </div>
-                  <div
-                    className="w-full rounded-lg p-[2px] bg-gradient-to-b from-[#6B737D] to-[#1C1D1F] cursor-pointer hover:brightness-150 duration-300"
-                    onClick={() => updateHandler(wallet)}
-                  >
-                    <div className="flex bg-[#28292C] justify-center items-center h-full rounded-lg py-2">
-                      <p className="text-white text-center align-middle">
-                        Update
-                      </p>
-                    </div>
-                  </div>
-                  <div
-                    className="w-full rounded-lg p-[2px] bg-gradient-to-b from-[#6B737D] to-[#1C1D1F] cursor-pointer hover:brightness-150 duration-300"
-                    onClick={() => detailsHandler(wallet._id)}
-                  >
-                    <div className="flex bg-[#28292C] justify-center items-center h-full rounded-lg py-2">
-                      <p className="text-white text-center align-middle">
-                        More details
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <></>
+                ) : (
+                  <></>
+                )
               )
-            )
-          ) : (
-            <div className="text-white">There is no NS Vault...</div>
-          )}
+            ) : (
+              <div className="text-white">There is no Pending Vault...</div>
+            )}
+          </div>
         </div>
 
-        <p className="text-white text-[24px] text-center mt-6 mb-4">
-          Taproot Vault
-        </p>
-        <div className="flex flex-wrap mx-4 items-start justify-around pt-4 gap-4">
-          {taprootWalletList?.length ? (
-            taprootWalletList.map((wallet: IWalletList, index: number) =>
-              wallet.cosigner.includes(paymentPublicKey) ? (
-                <div
-                  className="flex flex-col gap-3 w-[450px] px-6 rounded-3xl border-2 border-[#2C2C2C] bg-[#1C1D1F] p-4 text-white"
-                  key={index + "taprootWalletList"}
-                >
-                  <div className="flex flex-row gap-4 pb-5 border-b-2 border-b-[#28292C] items-center">
-                    <img
-                      className="rounded-full p-2 border-2 border-[#28292C] w-[50px] h-[50px]"
-                      src={
-                        wallet.imageUrl
-                          ? `/uploads/${wallet.imageUrl}`
-                          : "/multi-vault.png"
-                      }
-                    ></img>
-                    <div className="flex flex-col truncate">
-                      <p>Vault address</p>
-                      <div className="flex flex-row gap-2 items-center">
-                        <p className="text-[#FEE505] font-bold truncate underline underline-offset-4">
-                          {wallet.address}
+        <div className="flex flex-col gap-2 mt-20">
+          <p className="text-white text-[24px] text-center">
+            Native Segwit Vault
+          </p>
+          <div className="flex flex-wrap mx-4 items-start justify-around pt-4 gap-4">
+            {walletList?.length ? (
+              walletList.map((wallet: IWalletList, index: number) =>
+                wallet.cosigner.includes(paymentPublicKey) ? (
+                  <div
+                    className="flex flex-col gap-3 w-[450px] px-6 rounded-3xl border-2 border-[#2C2C2C] bg-[#1C1D1F] p-4 text-white"
+                    key={index + "wallet"}
+                  >
+                    <div className="flex flex-row gap-4 pb-5 border-b-2 border-b-[#28292C] items-center">
+                      <img
+                        className="rounded-full p-2 border-2 border-[#28292C] w-[50px] h-[50px]"
+                        src={
+                          wallet.imageUrl
+                            ? `/uploads/${wallet.imageUrl}`
+                            : "/multi-vault.png"
+                        }
+                      ></img>
+                      <div className="flex flex-col truncate">
+                        <p>Vault address</p>
+                        <div className="flex flex-row gap-2 items-center">
+                          <p className="text-[#FEE505] font-bold truncate underline underline-offset-4">
+                            {wallet.address}
+                          </p>
+                          <MdOutlineContentCopy
+                            size={36}
+                            className="text-[#5C636C] hover:text-white duration-300 cursor-pointer"
+                            onClick={() => onCopyClipboard(wallet.address)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-row justify-between mt-4">
+                      <p className="mr-10">Cosigners: </p>
+                      {wallet.cosigner.map((cosigner, index) => (
+                        <div
+                          className="truncate bg-[#28292C] ml-2 rounded-xl px-2"
+                          key={"cosinger" + index}
+                        >
+                          {cosigner}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex flex-row justify-between">
+                      <p>Threshold:</p>
+                      <p>{wallet.threshold}</p>
+                    </div>
+                    <div className="flex flex-row justify-between pb-6 border-b-2 border-[#2C2C2C] mb-4">
+                      <p>CreatedAt:</p>
+                      <p>{wallet.createdAt.split("T")[0]}</p>
+                    </div>
+                    <div
+                      className="w-full rounded-lg p-[2px] bg-gradient-to-b from-[#6B737D] to-[#1C1D1F] cursor-pointer hover:brightness-150 duration-300"
+                      onClick={() => updateHandler(wallet)}
+                    >
+                      <div className="flex bg-[#28292C] justify-center items-center h-full rounded-lg py-2">
+                        <p className="text-white text-center align-middle">
+                          Update
                         </p>
-                        <MdOutlineContentCopy
-                          size={36}
-                          className="text-[#5C636C] hover:text-white duration-300 cursor-pointer"
-                          onClick={() => onCopyClipboard(wallet.address)}
-                        />
+                      </div>
+                    </div>
+                    <div
+                      className="w-full rounded-lg p-[2px] bg-gradient-to-b from-[#6B737D] to-[#1C1D1F] cursor-pointer hover:brightness-150 duration-300"
+                      onClick={() => detailsHandler(wallet._id)}
+                    >
+                      <div className="flex bg-[#28292C] justify-center items-center h-full rounded-lg py-2">
+                        <p className="text-white text-center align-middle">
+                          More details
+                        </p>
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-row justify-between mt-4">
-                    <p className="mr-10">Cosigners: </p>
-                    {wallet.cosigner.map((cosigner, index) => (
-                      <div
-                        className="truncate bg-[#28292C] ml-2 rounded-xl px-2"
-                        key={"cosinger" + index}
-                      >
-                        {cosigner}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex flex-row justify-between">
-                    <p>Threshold:</p>
-                    <p>{wallet.threshold}</p>
-                  </div>
-                  <div className="flex flex-row justify-between pb-6 border-b-2 border-[#2C2C2C] mb-4">
-                    <p>CreatedAt:</p>
-                    <p>{wallet.createdAt.split("T")[0]}</p>
-                  </div>
-                  <div
-                    className="w-full rounded-lg p-[2px] bg-gradient-to-b from-[#6B737D] to-[#1C1D1F] cursor-pointer hover:brightness-150 duration-300"
-                    onClick={() => updateHandler(wallet)}
-                  >
-                    <div className="flex bg-[#28292C] justify-center items-center h-full rounded-lg py-2">
-                      <p className="text-white text-center align-middle">
-                        Update
-                      </p>
-                    </div>
-                  </div>
-                  <div
-                    className="w-full rounded-lg p-[2px] bg-gradient-to-b from-[#6B737D] to-[#1C1D1F] cursor-pointer hover:brightness-150 duration-300"
-                    onClick={() => detailsHandler(wallet._id)}
-                  >
-                    <div className="flex bg-[#28292C] justify-center items-center h-full rounded-lg py-2">
-                      <p className="text-white text-center align-middle">
-                        More details
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <></>
+                ) : (
+                  <></>
+                )
               )
-            )
-          ) : (
-            <div className="text-white">There is no taproot vault here</div>
-          )}
+            ) : (
+              <div className="text-white">There is no NS Vault...</div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 mt-20 mb-40">
+          <p className="text-white text-[24px] text-center">
+            Taproot Vault
+          </p>
+          <div className="flex flex-wrap mx-4 items-start justify-around pt-4 gap-4">
+            {taprootWalletList?.length ? (
+              taprootWalletList.map((wallet: IWalletList, index: number) =>
+                wallet.cosigner.includes(paymentPublicKey) ? (
+                  <div
+                    className="flex flex-col gap-3 w-[450px] px-6 rounded-3xl border-2 border-[#2C2C2C] bg-[#1C1D1F] p-4 text-white"
+                    key={index + "taprootWalletList"}
+                  >
+                    <div className="flex flex-row gap-4 pb-5 border-b-2 border-b-[#28292C] items-center">
+                      <img
+                        className="rounded-full p-2 border-2 border-[#28292C] w-[50px] h-[50px]"
+                        src={
+                          wallet.imageUrl
+                            ? `/uploads/${wallet.imageUrl}`
+                            : "/multi-vault.png"
+                        }
+                      ></img>
+                      <div className="flex flex-col truncate">
+                        <p>Vault address</p>
+                        <div className="flex flex-row gap-2 items-center">
+                          <p className="text-[#FEE505] font-bold truncate underline underline-offset-4">
+                            {wallet.address}
+                          </p>
+                          <MdOutlineContentCopy
+                            size={36}
+                            className="text-[#5C636C] hover:text-white duration-300 cursor-pointer"
+                            onClick={() => onCopyClipboard(wallet.address)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-row justify-between mt-4">
+                      <p className="mr-10">Cosigners: </p>
+                      {wallet.cosigner.map((cosigner, index) => (
+                        <div
+                          className="truncate bg-[#28292C] ml-2 rounded-xl px-2"
+                          key={"cosinger" + index}
+                        >
+                          {cosigner}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex flex-row justify-between">
+                      <p>Threshold:</p>
+                      <p>{wallet.threshold}</p>
+                    </div>
+                    <div className="flex flex-row justify-between pb-6 border-b-2 border-[#2C2C2C] mb-4">
+                      <p>CreatedAt:</p>
+                      <p>{wallet.createdAt.split("T")[0]}</p>
+                    </div>
+                    <div
+                      className="w-full rounded-lg p-[2px] bg-gradient-to-b from-[#6B737D] to-[#1C1D1F] cursor-pointer hover:brightness-150 duration-300"
+                      onClick={() => updateHandler(wallet)}
+                    >
+                      <div className="flex bg-[#28292C] justify-center items-center h-full rounded-lg py-2">
+                        <p className="text-white text-center align-middle">
+                          Update
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      className="w-full rounded-lg p-[2px] bg-gradient-to-b from-[#6B737D] to-[#1C1D1F] cursor-pointer hover:brightness-150 duration-300"
+                      onClick={() => detailsHandler(wallet._id)}
+                    >
+                      <div className="flex bg-[#28292C] justify-center items-center h-full rounded-lg py-2">
+                        <p className="text-white text-center align-middle">
+                          More details
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <></>
+                )
+              )
+            ) : (
+              <div className="text-white">There is no taproot vault here</div>
+            )}
+          </div>
         </div>
       </div>
     ) : pageIndex == 2 ? (

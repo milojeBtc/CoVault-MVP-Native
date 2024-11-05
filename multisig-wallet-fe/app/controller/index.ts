@@ -4,10 +4,7 @@ import {
   ITapItemList,
   ITapList,
 } from "../utils/_type";
-import {
-  OPENAPI_UNISAT_TOKEN,
-  OPENAPI_UNISAT_URL,
-} from "../utils/utils";
+import { OPENAPI_UNISAT_TOKEN, OPENAPI_UNISAT_URL } from "../utils/utils";
 import { IWalletList } from "../utils/_type";
 
 export const writeHistory = async (
@@ -74,23 +71,35 @@ export const walletConnect = async (
 };
 
 // Multisg
-export const createNewVault = async (
+export const createNewVaultController = async (
+  vaultName: string,
   cosignerList: string[],
   thresHoldValue: string,
-  assets?: IRuneAssets,
-  imageUrl?: string,
-  vaultType?: string
+  assets: IRuneAssets,
+  imageUrl: string,
+  vaultType: string,
+  walletName: string,
+  ordinalsAddress: string,
+  ordinalsPubkey: string,
+  paymentAddress: string,
+  paymentPubkey: string
 ) => {
   try {
     const response = await fetch(`/api/multisig/createNewVault`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        vaultName,
         cosignerList,
         thresHoldValue,
         assets,
         imageUrl,
         vaultType,
+        walletName,
+        ordinalsAddress,
+        ordinalsPubkey,
+        paymentAddress,
+        paymentPubkey,
       }),
     });
     const data = await response.json();
@@ -1817,7 +1826,7 @@ export const usdToBtcController = async (amount: number) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        amount
+        amount,
       }),
     });
     if (response.status == 200) {
@@ -1841,7 +1850,7 @@ export const getFeeLevelController = async (address: string) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        address
+        address,
       }),
     });
     if (response.status == 200) {
@@ -1855,6 +1864,40 @@ export const getFeeLevelController = async (address: string) => {
     }
   } catch (error) {
     console.log("usdToBtcController error ==> ", error);
+    return [];
+  }
+};
+
+export const joinPendingVaultController = async (
+  ordinalAddress: string,
+  ordinalPubkey: string,
+  paymentAddress: string,
+  paymentPubkey: string,
+  pendingVaultId: string
+) => {
+  try {
+    const response = await fetch(`/api/multisig/joinPendingVault`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ordinalAddress,
+        ordinalPubkey,
+        paymentAddress,
+        paymentPubkey,
+        pendingVaultId,
+      }),
+    });
+    if (response.status == 200) {
+      const data = await response.json();
+      console.log("join-pending-vault Controller ==> ", data);
+      return data;
+    } else {
+      const data = await response.json();
+      console.log("join-pending-vault Controller ==> ", data);
+      return data;
+    }
+  } catch (error) {
+    console.log("join-pending-vault error ==> ", error);
     return [];
   }
 };

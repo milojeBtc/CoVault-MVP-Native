@@ -833,6 +833,14 @@ export default function Page() {
     getAssetsByAddress();
   }, [multisigVaultData]);
 
+  useEffect(() => {
+    if(!ordinalAddress) {
+      Notiflix.Notify.failure("Wallet Connect First..");
+      router.push("/")
+      return
+    }
+  }, []);
+
   const clipboard = useClipboard();
   const onCopyClipboard = (str: string | undefined) => {
     Notiflix.Notify.success("Copied to clipboard.");
@@ -842,7 +850,7 @@ export default function Page() {
 
   return ordinalAddress ? (
     <>
-      <div className="py-20 px-10">
+      <div className="py-20 px-10 mt-20">
         {multisigVaultData ? (
           <div className="flex flex-col gap-4">
             <div className="mx-auto">
