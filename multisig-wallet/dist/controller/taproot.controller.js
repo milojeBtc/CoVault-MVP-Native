@@ -55,7 +55,7 @@ bitcoin.initEccLib(ecc);
 const bip32 = (0, bip32_1.default)(ecc);
 const network = config_1.TEST_MODE ? bitcoin.networks.testnet : bitcoin.networks.bitcoin;
 // tb1p6m6r55qey5j9n3f6ds24kzz7acpcktwwwkrx54k35eqnvqtcx5ps65932q
-const createTaprootMultisig = (pubkeyList, threshold, assets, imageUrl) => __awaiter(void 0, void 0, void 0, function* () {
+const createTaprootMultisig = (vaultName, pubkeyList, threshold, assets, imageUrl) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         const leafPubkeys = pubkeyList.map((pubkey) => (0, bip371_1.toXOnly)(Buffer.from(pubkey, "hex")));
@@ -63,6 +63,7 @@ const createTaprootMultisig = (pubkeyList, threshold, assets, imageUrl) => __awa
         const multiSigWallet = new mutisigWallet_1.TaprootMultisigWallet(leafPubkeys, threshold * 1, leafKey.privateKey, bip341_1.LEAF_VERSION_TAPSCRIPT).setNetwork(config_1.TEST_MODE ? bitcoin.networks.testnet : bitcoin.networks.bitcoin);
         console.log("address ==> ", multiSigWallet.address);
         const newTaproot = new TaprootMultisig_1.default({
+            vaultName,
             cosigner: pubkeyList,
             threshold,
             privateKey: (_a = leafKey.privateKey) === null || _a === void 0 ? void 0 : _a.toString("hex"),

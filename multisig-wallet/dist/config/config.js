@@ -13,9 +13,9 @@ catch (error) {
     console.error("Error loading environment variables:", error);
     process.exit(1);
 }
-exports.PORT = process.env.PORT || 9020;
+exports.PORT = process.env.PORT || 9040;
 exports.JWT_SECRET = process.env.JWT_SECRET || "JWT_SECRET";
-exports.TEST_MODE = true;
+exports.TEST_MODE = false;
 exports.MONGO_URL = exports.TEST_MODE
     ? `mongodb+srv://toskypi1016:Zjlf8P7TbhS2oy89@cluster0.qyg4xxl.mongodb.net/Multisig`
     : `mongodb+srv://michalstefanowmarek:0QmtMFAXiHVKEVAi@cluster0.7emwb.mongodb.net/`;

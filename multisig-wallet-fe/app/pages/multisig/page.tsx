@@ -248,7 +248,7 @@ export default function Page() {
                     <div className="flex flex-col justify-between mt-4">
                       <p className="mr-10">Cosigners: </p>
                       <div className="flex flex-col pl-4">
-                        {wallet.addressList.map(list => <div className="truncate">{list}</div>)}
+                        {wallet.addressList.map((list, index) => <div className="truncate" key={"addressList"+index}>{list}</div>)}
                       </div>
                     </div>
                     <div className="flex flex-row justify-between">

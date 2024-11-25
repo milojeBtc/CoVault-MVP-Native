@@ -37,33 +37,185 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const Bitcoin = __importStar(require("bitcoinjs-lib"));
-const config_1 = require("../../config/config");
 const nativeMusig_controller_1 = require("../../controller/nativeMusig.controller");
 const nativeMusig_controller_2 = require("../../controller/nativeMusig.controller");
 const Multisig_1 = __importDefault(require("../../model/Multisig"));
-const rune_controller_1 = require("../../controller/rune.controller");
 const taproot_controller_1 = require("../../controller/taproot.controller");
 const TaprootMultisig_1 = __importDefault(require("../../model/TaprootMultisig"));
 const type_1 = require("../../type");
 const request_controller_1 = require("../../controller/request.controller");
+const PendingMultisig_1 = __importDefault(require("../../model/PendingMultisig"));
 // Create a new instance of the Express Router
 const multiSigWalletRoute = (0, express_1.Router)();
-multiSigWalletRoute.post("/create-vault", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+// multiSigWalletRoute.post("/create-vault", async (req, res) => {
+//   try {
+//     console.log("create-nativeSegwit api is called!!");
+//     console.log(req.body);
+//     const { pubKeyList, minSignCount, assets, imageUrl, vaultType } = req.body;
+//     let error = "";
+//     if (!pubKeyList.length) error += "There is no publicKey value.";
+//     if (!minSignCount) error += "There is no minSignCount value.";
+//     if (!imageUrl) error += "There is no imageUrl value.";
+//     if (!vaultType) error += "There is no vaultType value.";
+//     if (minSignCount > pubKeyList.length)
+//       error += "minSignCount should be less than pubkey list count";
+//     if (error) {
+//       console.log("input error ==> ", error);
+//       return res.status(400).send({
+//         success: false,
+//         message: error,
+//         payload: null,
+//       });
+//     }
+//     if (vaultType == VaultType.NativeSegwit) {
+//       // Create new vault.
+//       const payload = await createNativeSegwit(
+//         pubKeyList,
+//         minSignCount,
+//         assets,
+//         TEST_MODE ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin,
+//         imageUrl
+//       );
+//       console.log("payload after createNativeSegwit ==> ", payload);
+//       if (!payload.success)
+//         return res.status(200).send({
+//           success: payload.success,
+//           message: payload.message,
+//           payload: {
+//             vault: null,
+//             rune: null,
+//           },
+//         });
+//       console.log("Created new vault successfully!!");
+//       if (assets.runeName == "None")
+//         return res.status(200).send({
+//           success: payload.success,
+//           message: payload.message,
+//           payload: {
+//             vault: payload,
+//             rune: null,
+//           },
+//         });
+//       // Etching new rune tokens
+//       const { runeName, runeAmount, runeSymbol, initialPrice, creatorAddress } =
+//         assets;
+//       const result = await createRuneToken(
+//         runeName,
+//         runeAmount,
+//         runeSymbol,
+//         initialPrice,
+//         creatorAddress
+//       );
+//       console.log("Finished etching new rune toens ==> ", result);
+//       if (!result.success) {
+//         await MultisigModal.findByIdAndDelete(payload.payload?.DBID);
+//         console.log("Remove new wallet cuz rune etching failed..");
+//         payload.message = "Vault creation is cancelled.";
+//         payload.payload = null;
+//         return res.status(200).send({
+//           success: result.success,
+//           message: result.message,
+//           payload: {
+//             vault: payload,
+//             rune: result,
+//           },
+//         });
+//       }
+//       return res.status(200).send({
+//         success: result.success,
+//         message: payload.message + " " + result.message,
+//         payload: {
+//           vault: payload,
+//           rune: result,
+//         },
+//       });
+//     } else {
+//       const payload = await createTaprootMultisig(
+//         pubKeyList,
+//         minSignCount,
+//         assets,
+//         imageUrl
+//       );
+//       console.log("payload after createNativeSegwit ==> ", payload);
+//       if (!payload.success)
+//         return res.status(200).send({
+//           success: payload.success,
+//           message: payload.message,
+//           payload: {
+//             vault: null,
+//             rune: null,
+//           },
+//         });
+//       console.log("Created new vault successfully!!");
+//       if (assets.runeName == "None")
+//         return res.status(200).send({
+//           success: payload.success,
+//           message: payload.message,
+//           payload: {
+//             vault: payload,
+//             rune: null,
+//           },
+//         });
+//       // Etching new rune tokens
+//       const { runeName, runeAmount, runeSymbol, initialPrice, creatorAddress } =
+//         assets;
+//       const result = await createRuneToken(
+//         runeName,
+//         runeAmount,
+//         runeSymbol,
+//         initialPrice,
+//         creatorAddress
+//       );
+//       console.log("Finished etching new rune toens ==> ", result);
+//       if (!result.success) {
+//         await MultisigModal.findByIdAndDelete(payload.payload?.DBID);
+//         console.log("Remove new wallet cuz rune etching failed..");
+//         payload.message = "Vault creation is cancelled.";
+//         payload.payload = null;
+//         return res.status(200).send({
+//           success: result.success,
+//           message: result.message,
+//           payload: {
+//             vault: payload,
+//             rune: result,
+//           },
+//         });
+//       }
+//       return res.status(200).send({
+//         success: result.success,
+//         message: payload.message + " " + result.message,
+//         payload: {
+//           vault: payload,
+//           rune: result,
+//         },
+//       });
+//     }
+//   } catch (error: any) {
+//     console.error(error);
+//     return res.status(500).send({
+//       success: false,
+//       message: "There is Something wrong..",
+//       payload: null,
+//     });
+//   }
+// });
+multiSigWalletRoute.post("/create-pending-vault", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        console.log("create-nativeSegwit api is called!!");
-        console.log(req.body);
-        const { pubKeyList, minSignCount, assets, imageUrl, vaultType } = req.body;
+        const { vaultName, addressList, minSignCount, assets, imageUrl, vaultType, creator } = req.body;
         let error = "";
-        if (!pubKeyList.length)
-            error += "There is no publicKey value.";
+        if (!vaultName.length)
+            error += "There is no vaultName value.";
+        if (!addressList.length)
+            error += "There is no addressList value.";
         if (!minSignCount)
             error += "There is no minSignCount value.";
         if (!imageUrl)
             error += "There is no imageUrl value.";
         if (!vaultType)
             error += "There is no vaultType value.";
-        if (minSignCount > pubKeyList.length)
+        if (!creator)
+            error += "There is no creator value.";
+        if (minSignCount > addressList.length)
             error += "minSignCount should be less than pubkey list count";
         if (error) {
             console.log("input error ==> ", error);
@@ -73,121 +225,53 @@ multiSigWalletRoute.post("/create-vault", (req, res) => __awaiter(void 0, void 0
                 payload: null,
             });
         }
-        if (vaultType == type_1.VaultType.NativeSegwit) {
-            // Create new vault.
-            const payload = yield (0, nativeMusig_controller_1.createNativeSegwit)(pubKeyList, minSignCount, assets, config_1.TEST_MODE ? Bitcoin.networks.testnet : Bitcoin.networks.bitcoin, imageUrl);
-            console.log("payload after createNativeSegwit ==> ", payload);
-            if (!payload.success)
-                return res.status(200).send({
-                    success: payload.success,
-                    message: payload.message,
-                    payload: {
-                        vault: null,
-                        rune: null,
-                    },
-                });
-            console.log("Created new vault successfully!!");
-            if (assets.runeName == "None")
-                return res.status(200).send({
-                    success: payload.success,
-                    message: payload.message,
-                    payload: {
-                        vault: payload,
-                        rune: null,
-                    },
-                });
-            // Etching new rune tokens
-            const { runeName, runeAmount, runeSymbol, initialPrice, creatorAddress } = assets;
-            const result = yield (0, rune_controller_1.createRuneToken)(runeName, runeAmount, runeSymbol, initialPrice, creatorAddress);
-            console.log("Finished etching new rune toens ==> ", result);
-            if (!result.success) {
-                yield Multisig_1.default.findByIdAndDelete((_a = payload.payload) === null || _a === void 0 ? void 0 : _a.DBID);
-                console.log("Remove new wallet cuz rune etching failed..");
-                payload.message = "Vault creation is cancelled.";
-                payload.payload = null;
-                return res.status(200).send({
-                    success: result.success,
-                    message: result.message,
-                    payload: {
-                        vault: payload,
-                        rune: result,
-                    },
-                });
-            }
-            return res.status(200).send({
-                success: result.success,
-                message: payload.message + " " + result.message,
-                payload: {
-                    vault: payload,
-                    rune: result,
-                },
-            });
-        }
-        else {
-            const payload = yield (0, taproot_controller_1.createTaprootMultisig)(pubKeyList, minSignCount, assets, imageUrl);
-            console.log("payload after createNativeSegwit ==> ", payload);
-            if (!payload.success)
-                return res.status(200).send({
-                    success: payload.success,
-                    message: payload.message,
-                    payload: {
-                        vault: null,
-                        rune: null,
-                    },
-                });
-            console.log("Created new vault successfully!!");
-            if (assets.runeName == "None")
-                return res.status(200).send({
-                    success: payload.success,
-                    message: payload.message,
-                    payload: {
-                        vault: payload,
-                        rune: null,
-                    },
-                });
-            // Etching new rune tokens
-            const { runeName, runeAmount, runeSymbol, initialPrice, creatorAddress } = assets;
-            const result = yield (0, rune_controller_1.createRuneToken)(runeName, runeAmount, runeSymbol, initialPrice, creatorAddress);
-            console.log("Finished etching new rune toens ==> ", result);
-            if (!result.success) {
-                yield Multisig_1.default.findByIdAndDelete((_b = payload.payload) === null || _b === void 0 ? void 0 : _b.DBID);
-                console.log("Remove new wallet cuz rune etching failed..");
-                payload.message = "Vault creation is cancelled.";
-                payload.payload = null;
-                return res.status(200).send({
-                    success: result.success,
-                    message: result.message,
-                    payload: {
-                        vault: payload,
-                        rune: result,
-                    },
-                });
-            }
-            return res.status(200).send({
-                success: result.success,
-                message: payload.message + " " + result.message,
-                payload: {
-                    vault: payload,
-                    rune: result,
-                },
-            });
-        }
+        const result = yield (0, nativeMusig_controller_1.createPendingVaultController)(vaultName, addressList, minSignCount, imageUrl, vaultType, assets, creator);
+        return res.status(200).send({
+            success: true,
+            message: "Pending Vault is saved successfully.",
+            payload: result,
+        });
     }
     catch (error) {
-        console.error(error);
-        return res.status(500).send({
+        return res.status(200).send({
             success: false,
-            message: "There is Something wrong..",
+            message: "Get some error while creating pending multisig.",
+            payload: error,
+        });
+    }
+}));
+multiSigWalletRoute.post("/join-pending-vault", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { ordinalAddress, ordinalPubkey, paymentAddress, paymentPubkey, pendingVaultId, } = req.body;
+    let error = "";
+    if (!ordinalAddress)
+        error += "There is no ordinalAddress value.";
+    if (!ordinalPubkey)
+        error += "There is no ordinalPubkey value.";
+    if (!paymentAddress)
+        error += "There is no paymentAddress value.";
+    if (!paymentPubkey)
+        error += "There is no paymentPubkey value.";
+    if (!pendingVaultId)
+        error += "There is no pendingVaultId value.";
+    if (error) {
+        console.log("input error ==> ", error);
+        return res.status(400).send({
+            success: false,
+            message: error,
             payload: null,
         });
     }
+    yield (0, nativeMusig_controller_1.joinPendingVaultController)(res, pendingVaultId, ordinalAddress, ordinalPubkey, paymentAddress, paymentPubkey);
 }));
 multiSigWalletRoute.get("/fetchVaultList", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         console.log("fetchWalletList api is called!!");
         const nativeList = yield Multisig_1.default.find();
         const taprootList = yield TaprootMultisig_1.default.find();
-        if (!nativeList.length && !taprootList.length)
+        const pendingVaultList = yield PendingMultisig_1.default.find({
+            pending: true
+        });
+        if (!nativeList.length && !taprootList.length && !pendingVaultList.length)
             return res.status(200).send({
                 success: false,
                 message: "There is no wallet here.",
@@ -199,6 +283,7 @@ multiSigWalletRoute.get("/fetchVaultList", (req, res) => __awaiter(void 0, void 
             payload: {
                 native: nativeList,
                 taproot: taprootList,
+                pendingVault: pendingVaultList
             },
         });
     }
@@ -297,7 +382,7 @@ multiSigWalletRoute.post("/update-vault", (req, res) => __awaiter(void 0, void 0
 }));
 multiSigWalletRoute.post("/sendBtc", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { walletId, destination, amount, paymentAddress, ordinalAddress, vaultType } = req.body;
+        const { walletId, destination, amount, paymentAddress, ordinalAddress, vaultType, } = req.body;
         let error = "";
         if (!walletId)
             error += "There is no walletId value.";
@@ -492,7 +577,7 @@ multiSigWalletRoute.post("/combine", (req, res) => __awaiter(void 0, void 0, voi
 multiSigWalletRoute.post("/send-ordinals-ns", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("exec in send-ordinals-ns ==>  api is calling!!");
     try {
-        const { vaultId, destination, inscriptionId, paymentAddress, ordinalAddress } = req.body;
+        const { vaultId, destination, inscriptionId, paymentAddress, ordinalAddress, } = req.body;
         let error = "";
         if (!vaultId)
             error += "There is no vaultId value.";
@@ -528,7 +613,7 @@ multiSigWalletRoute.post("/send-ordinals-ns", (req, res) => __awaiter(void 0, vo
 multiSigWalletRoute.post("/send-ordinals-taproot", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("send-ordinals-ns ==>  api is calling!!");
     try {
-        const { vaultId, destination, inscriptionId, paymentAddress, ordinalAddress } = req.body;
+        const { vaultId, destination, inscriptionId, paymentAddress, ordinalAddress, } = req.body;
         let error = "";
         if (!vaultId)
             error += "There is no walletId value.";
@@ -562,7 +647,7 @@ multiSigWalletRoute.post("/send-ordinals-taproot", (req, res) => __awaiter(void 
 multiSigWalletRoute.post("/send-brc20-ns", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("send-brc20-ns ==>  api is calling!!");
     try {
-        const { vaultId, inscriptionId, destination, ticker, amount, paymentAddress, ordinalAddress } = req.body;
+        const { vaultId, inscriptionId, destination, ticker, amount, paymentAddress, ordinalAddress, } = req.body;
         console.log("req.body in send-brc20-ns ==> ", req.body);
         let error = "";
         if (!vaultId)

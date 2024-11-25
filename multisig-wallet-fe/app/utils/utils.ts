@@ -1,5 +1,5 @@
 export const SIGN_MESSAGE = "Welcome to Co-vault!";
-export const TEST_MODE = true;
+export const TEST_MODE = false;
 
 export const MEMPOOL_API = TEST_MODE
   ? "https://mempool.space/testnet/api"

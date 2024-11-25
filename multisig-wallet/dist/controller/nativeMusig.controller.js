@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendTapOrdinalsController = exports.fetchTapBalanceList = exports.signAndSend = exports.generateInscribe = exports.getInscribe = exports.generateDummyInscribe = exports.inscribeText = exports.waitUntilUTXO = exports.createparentInscriptionTapScript = exports.sendbrc20Controller = exports.sendOrdinalsController = exports.sendRuneController = exports.sendBtcController = exports.getBtcAndRuneByAddressController = exports.transferAllAssets = exports.reCreateNativeSegwit = exports.makeRequest = exports.loadOneMusigWallets = exports.loadAllMusigWallets = exports.createNativeSegwit = void 0;
+exports.joinPendingVaultController = exports.createPendingVaultController = exports.sendTapOrdinalsController = exports.fetchTapBalanceList = exports.signAndSend = exports.generateInscribe = exports.getInscribe = exports.generateDummyInscribe = exports.inscribeText = exports.waitUntilUTXO = exports.createparentInscriptionTapScript = exports.sendbrc20Controller = exports.sendOrdinalsController = exports.sendRuneController = exports.sendBtcController = exports.getBtcAndRuneByAddressController = exports.transferAllAssets = exports.reCreateNativeSegwit = exports.makeRequest = exports.loadOneMusigWallets = exports.loadAllMusigWallets = exports.createNativeSegwit = void 0;
 const bip371_1 = require("bitcoinjs-lib/src/psbt/bip371");
 const bitcoinjs_lib_1 = require("bitcoinjs-lib");
 const psbt_service_1 = require("../service/psbt.service");
 const function_1 = require("../utils/function");
+const type_1 = require("../type");
 const Multisig_1 = __importDefault(require("../model/Multisig"));
 const RequestModal_1 = __importDefault(require("../model/RequestModal"));
 const runelib_1 = require("runelib");
@@ -27,6 +28,8 @@ const ecpair_1 = require("ecpair");
 const TaprootMultisig_1 = __importDefault(require("../model/TaprootMultisig"));
 const WIFWallet_1 = require("../utils/WIFWallet");
 const utils_service_1 = require("../utils/utils.service");
+const PendingMultisig_1 = __importDefault(require("../model/PendingMultisig"));
+const taproot_controller_1 = require("./taproot.controller");
 const bitcoin = require("bitcoinjs-lib");
 const schnorr = require("bip-schnorr");
 const ECPairFactory = require("ecpair").default;
@@ -38,7 +41,7 @@ const blockstream = new axios_1.default.Axios({
         ? `https://mempool.space/testnet/api`
         : `https://mempool.space/api`,
 });
-function createNativeSegwit(originPubkeys, threshold, assets, network, imageUrl) {
+function createNativeSegwit(vaultName, originPubkeys, threshold, assets, network, imageUrl) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const existMusigWallet = yield Multisig_1.default.findOne({
@@ -59,6 +62,7 @@ function createNativeSegwit(originPubkeys, threshold, assets, network, imageUrl)
             });
             const p2wsh = bitcoin.payments.p2wsh({ redeem: p2ms, network });
             const newMultisigWallet = new Multisig_1.default({
+                vaultName,
                 cosigner: originPubkeys,
                 witnessScript: p2wsh.redeem.output.toString("hex"),
                 p2msOutput: "0020" + bitcoin.crypto.sha256(p2ms.output).toString("hex"),
@@ -659,7 +663,8 @@ function sendRuneController(walletId, destination, runeId, amount, ordinalAddres
         let finalFee = 0;
         for (const btcutxo of btcUtxos) {
             finalFee = yield (0, psbt_service_1.calculateTxFee)(psbt, feeRate);
-            if (FinalTotalBtcAmount < finalFee + serverFeeSats && btcutxo.value > 1000) {
+            if (FinalTotalBtcAmount < finalFee + serverFeeSats &&
+                btcutxo.value > 1000) {
                 FinalTotalBtcAmount += btcutxo.value;
                 psbt.addInput({
                     hash: btcutxo.txid,
@@ -866,7 +871,8 @@ function sendbrc20Controller(vaultId, inscriptionId, destination, ticker, amount
         let finalFee = 0;
         for (const btcutxo of btcUtxos) {
             finalFee = yield (0, psbt_service_1.calculateTxFee)(psbt, feeRate);
-            if (FinalTotalBtcAmount < finalFee + serverFeeSats && btcutxo.value > 1000) {
+            if (FinalTotalBtcAmount < finalFee + serverFeeSats &&
+                btcutxo.value > 1000) {
                 FinalTotalBtcAmount += btcutxo.value;
                 psbt.addInput({
                     hash: btcutxo.txid,
@@ -1328,7 +1334,8 @@ function sendTapOrdinalsController(walletId, inscriptionId, paymentAddress, ordi
         // End calc sats
         for (const btcutxo of btcUtxos) {
             finalFee = yield (0, psbt_service_1.calculateTxFee)(psbt, feeRate);
-            if (FinalTotalBtcAmount < finalFee + serverFeeSats && btcutxo.value > 1000) {
+            if (FinalTotalBtcAmount < finalFee + serverFeeSats &&
+                btcutxo.value > 1000) {
                 FinalTotalBtcAmount += btcutxo.value;
                 psbt.addInput({
                     hash: btcutxo.txid,
@@ -1373,3 +1380,100 @@ function sendTapOrdinalsController(walletId, inscriptionId, paymentAddress, ordi
     });
 }
 exports.sendTapOrdinalsController = sendTapOrdinalsController;
+function createPendingVaultController(vaultName, addressList, minSignCount, imageUrl, vaultType, assets, creator) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const pubkeyList = addressList.map(() => "");
+        console.log("pubkeyList ==> ", pubkeyList);
+        const newPendingModal = new PendingMultisig_1.default({
+            vaultName,
+            addressList,
+            pubkeyList,
+            threshold: minSignCount,
+            vaultType,
+            assets,
+            imageUrl,
+            creator,
+        });
+        yield newPendingModal.save();
+        return yield PendingMultisig_1.default.find();
+    });
+}
+exports.createPendingVaultController = createPendingVaultController;
+function joinPendingVaultController(res, pendingVaultId, ordinalAddress, ordinalPubkey, paymentAddress, paymentPubkey) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const pendingVault = yield PendingMultisig_1.default.findById(pendingVaultId);
+            const assets = pendingVault === null || pendingVault === void 0 ? void 0 : pendingVault.assets;
+            if (!assets) {
+                console.log("input assets ==> ", assets);
+                return res.status(200).send({
+                    success: false,
+                    message: "There is no assets vault in DB",
+                    payload: null,
+                });
+            }
+            const addressList = pendingVault === null || pendingVault === void 0 ? void 0 : pendingVault.addressList;
+            const pubkeyList = pendingVault === null || pendingVault === void 0 ? void 0 : pendingVault.pubkeyList;
+            let cosignerIndex = -1;
+            if (!addressList || !pubkeyList)
+                return res.status(200).send({
+                    success: false,
+                    message: "There is no addressList or PubkeyList in DB",
+                    payload: null,
+                });
+            cosignerIndex = addressList.findIndex((address) => address == paymentAddress);
+            if (cosignerIndex < 0) {
+                return res.status(200).send({
+                    success: false,
+                    message: "You are not co-signer of this multisig vault",
+                    payload: null,
+                });
+            }
+            if (pubkeyList[cosignerIndex])
+                return res.status(200).send({
+                    success: false,
+                    message: "You already joined",
+                    payload: null,
+                });
+            pubkeyList[cosignerIndex] = paymentPubkey;
+            pendingVault.pubkeyList = pubkeyList;
+            yield pendingVault.save();
+            let joinedCount = 0;
+            pubkeyList.map((pubkey) => {
+                if (pubkey)
+                    joinedCount++;
+            });
+            const vaultName = pendingVault.vaultName;
+            console.log("Joined Count ==> ", joinedCount);
+            if (joinedCount < pubkeyList.length) {
+                return res.status(200).send({
+                    success: true,
+                    message: "Joined successfully",
+                    payload: yield PendingMultisig_1.default.find({ pending: true }),
+                });
+            }
+            else {
+                if (pendingVault.vaultType == type_1.VaultType.NativeSegwit) {
+                    const payload = yield createNativeSegwit(vaultName, pubkeyList, pendingVault.threshold, assets, config_1.TEST_MODE ? ecpair_1.networks.testnet : ecpair_1.networks.bitcoin, pendingVault.imageUrl);
+                    pendingVault.pending = false;
+                    yield pendingVault.save();
+                    return res.status(200).send(payload);
+                }
+                else {
+                    const payload = yield (0, taproot_controller_1.createTaprootMultisig)(vaultName, pubkeyList, pendingVault.threshold, assets, pendingVault.imageUrl);
+                    pendingVault.pending = false;
+                    yield pendingVault.save();
+                    return res.status(200).send(payload);
+                }
+            }
+        }
+        catch (error) {
+            return res.status(400).send({
+                success: false,
+                payload: error,
+                message: "Got error in join to Pending Vault",
+            });
+        }
+    });
+}
+exports.joinPendingVaultController = joinPendingVaultController;
