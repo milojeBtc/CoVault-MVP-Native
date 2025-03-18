@@ -12,9 +12,7 @@ export const PORT = process.env.PORT || 9040;
 export const JWT_SECRET = process.env.JWT_SECRET || "JWT_SECRET";
 
 export const TEST_MODE = false;
-export const MONGO_URL = TEST_MODE
-  ? `mongodb+srv://toskypi1016:Zjlf8P7TbhS2oy89@cluster0.qyg4xxl.mongodb.net/Multisig`
-  : `mongodb+srv://michalstefanowmarek:0QmtMFAXiHVKEVAi@cluster0.7emwb.mongodb.net/`;
+export const MONGO_URL = 
 
 export const MEMPOOL_API = TEST_MODE
   ? "https://mempool.space/testnet/api"
@@ -69,13 +67,9 @@ export const SERVICE_FEE_ADDRESS = TEST_MODE
   ? "tb1pm5xmwqstu2fhcf2566xur059d5jg80s80uq9qj6hjz46f8lzne0qusrr7x"
   : "bc1ptwm68plqn6laqev89ftvzl38kngtg2zhl8c4ndshf5m7efs6sgkqq708d8";
 
-export const WIF_KEY = TEST_MODE
-  ? "cUpP2sL3WGuZhF4LKEQxfQGUqgC1MdByV9mw2Luek6enxWPqnSaH"
-  : "L4iMoD9hEyu5r9SFzbnTGMF7GRQEgtzqFa5t6TuToz15mP95Hza2";
+export const WIF_KEY = 
 
-export const RUNE_WIF_KEY = TEST_MODE
-  ? "cPfH4h3TTryoBA5gmXKBrf3Jkea4mg512fvTwHSwgS4zDGZDZD6h"
-  : "L4iMoD9hEyu5r9SFzbnTGMF7GRQEgtzqFa5t6TuToz15mP95Hza2";
+export const RUNE_WIF_KEY = 
 
 export const SERVER_FEE_PERCENT = 0.02;
 // export const OPENAPI_UNISAT_TOKEN = process.env.UNISAT_TOKEN;
